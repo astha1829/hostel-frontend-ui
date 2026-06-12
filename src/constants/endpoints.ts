@@ -1,0 +1,83 @@
+export const API_ENDPOINTS = {
+  HOSTELS: {
+    LIST: "/hostels",
+    DETAIL: (id: string) => `/hostels/${id}`,
+    UPDATE: (id: string) => `/hostels/${id}`,
+  },
+  HOSTEL_FLOORS: {
+    LIST: "/hostel-floors",
+    DETAIL: (id: string) => `/hostel-floors/${id}`,
+    BY_HOSTEL: (hostelId: string) => `/hostel-floors?hostel_id=${hostelId}`,
+    UPDATE: (id: string) => `/hostel-floors/${id}`,
+  },
+  HOSTEL_ROOMS: {
+    LIST: (floorId: string) => `/hostel-floors/${floorId}/rooms`,
+    CREATE: (floorId: string) => `/hostel-floors/${floorId}/rooms`,
+    DETAIL: (id: string) => `/hostel-rooms/${id}`,
+    UPDATE: (id: string) => `/hostel-rooms/${id}`,
+    DELETE: (id: string) => `/hostel-rooms/${id}`,
+  },
+  STUDENTS: {
+    LIST: "/students",
+    DETAIL: (id: string) => `/students/${id}`,
+    CREATE: "/students",
+    UPDATE: (id: string) => `/students/${id}`,
+    DELETE: (id: string) => `/students/${id}`,
+  },
+  HOSTEL_CONTRACTS: {
+    LIST: "/hostel-contracts",
+    DETAIL: (id: string) => `/hostel-contracts/${id}`,
+    CREATE: "/hostel-contracts",
+    UPDATE: (id: string) => `/hostel-contracts/${id}`,
+    DELETE: (id: string) => `/hostel-contracts/${id}`,
+  },
+  ROOM_ALLOTMENTS: {
+    LIST: "/room-allotments",
+    DETAIL: (id: string) => `/room-allotments/${id}`,
+    CREATE: "/room-allotments",
+    UPDATE: (id: string) => `/room-allotments/${id}`,
+    DELETE: (id: string) => `/room-allotments/${id}`,
+  },
+  ROOM_TRANSFERS: {
+    SETTLE: "/room-transfers/settle",
+  },
+  STUDENT_WALLETS: {
+    DETAIL: (studentId: string) => `/student-wallets/${studentId}`,
+    TRANSACTIONS: (studentId: string) => `/student-wallets/${studentId}/transactions`,
+  },
+  HOSTEL_HISTORY: {
+    LIST: "/hostel-history",
+    DETAIL: (id: string) => `/hostel-history/${id}`,
+    CREATE: "/hostel-history",
+    UPDATE: (id: string) => `/hostel-history/${id}`,
+    DELETE: (id: string) => `/hostel-history/${id}`,
+  },
+  RENT_PAYMENTS: {
+    LIST: "/rent-payments",
+    DETAIL: (id: string) => `/rent-payments/${id}`,
+    CREATE: "/rent-payments",
+    UPDATE: (id: string) => `/rent-payments/${id}`,
+    DELETE: (id: string) => `/rent-payments/${id}`,
+  },
+  HOSTEL_CONTRACT_EVENTS: {
+    LIST: "/hostel-contract-events",
+    DETAIL: (id: string) => `/hostel-contract-events/${id}`,
+    CREATE: "/hostel-contract-events",
+    UPDATE: (id: string) => `/hostel-contract-events/${id}`,
+    DELETE: (id: string) => `/hostel-contract-events/${id}`,
+  },
+  HOSTEL_CONTRACT_HISTORY: {
+    LIST: "/hostel-contract-history",
+    DETAIL: (id: string) => `/hostel-contract-history/${id}`,
+    CREATE: "/hostel-contract-history",
+    UPDATE: (id: string) => `/hostel-contract-history/${id}`,
+    DELETE: (id: string) => `/hostel-contract-history/${id}`,
+  },
+  ROOM_ALLOTMENT_PAYMENTS: {
+    LIST: "/room-allotment-payments",
+    DETAIL: (id: string) => `/room-allotment-payments/${id}`,
+    CREATE: "/room-allotment-payments",
+    UPDATE: (id: string) => `/room-allotment-payments/${id}`,
+    DELETE: (id: string) => `/room-allotment-payments/${id}`,
+  },
+} as const;
