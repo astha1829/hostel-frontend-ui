@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Trash2, Edit3, Calendar, FileText, ArrowRight, CreditCard, DollarSign } from "lucide-react";
 import { TableContainer, Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
+import { ActionButtons } from "@/components/ui/action-buttons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { RentPayment } from "../types";
@@ -59,11 +60,11 @@ export const RentPaymentsTable: React.FC<RentPaymentsTableProps> = ({
     <TableContainer className="border border-border/80 shadow-sm rounded-lg overflow-hidden">
       <Table>
         <TableHeader>
-          <TableRow className="bg-secondary/20">
-            <TableHead className="w-[14%] font-semibold uppercase tracking-wider text-xs">Rent Payment ID</TableHead>
-            <TableHead className="w-[22%] font-semibold uppercase tracking-wider text-xs">Student</TableHead>
+          <TableRow className="bg-secondary/20 h-[44px]">
+            <TableHead className="w-[14%] table-header leading-[1.4] align-middle">Rent Payment ID</TableHead>
+            <TableHead className="w-[22%] table-header leading-[1.4] align-middle">Student</TableHead>
             <TableHead 
-              className="w-[10%] cursor-pointer hover:bg-secondary/40 transition-colors group font-semibold uppercase tracking-wider text-xs"
+              className="w-[10%] cursor-pointer hover:bg-secondary/40 transition-colors group table-header leading-[1.4] align-middle"
               onClick={() => onSort("against_month")}
             >
               <div className="flex items-center gap-1">
@@ -71,9 +72,9 @@ export const RentPaymentsTable: React.FC<RentPaymentsTableProps> = ({
                 <SortIndicator field="against_month" />
               </div>
             </TableHead>
-            <TableHead className="w-[14%] font-semibold uppercase tracking-wider text-xs">Transaction Type</TableHead>
+            <TableHead className="w-[14%] table-header leading-[1.4] align-middle">Transaction Type</TableHead>
             <TableHead 
-              className="w-[12%] cursor-pointer hover:bg-secondary/40 transition-colors group font-semibold uppercase tracking-wider text-xs"
+              className="w-[12%] cursor-pointer hover:bg-secondary/40 transition-colors group table-header leading-[1.4] align-middle"
               onClick={() => onSort("amount")}
             >
               <div className="flex items-center gap-1">
@@ -81,9 +82,9 @@ export const RentPaymentsTable: React.FC<RentPaymentsTableProps> = ({
                 <SortIndicator field="amount" />
               </div>
             </TableHead>
-            <TableHead className="w-[13%] font-semibold uppercase tracking-wider text-xs">Allotment</TableHead>
+            <TableHead className="w-[13%] table-header leading-[1.4] align-middle">Allotment</TableHead>
             <TableHead 
-              className="w-[10%] cursor-pointer hover:bg-secondary/40 transition-colors group font-semibold uppercase tracking-wider text-xs"
+              className="w-[10%] cursor-pointer hover:bg-secondary/40 transition-colors group table-header leading-[1.4] align-middle"
               onClick={() => onSort("posting_datetime")}
             >
               <div className="flex items-center gap-1">
@@ -91,7 +92,7 @@ export const RentPaymentsTable: React.FC<RentPaymentsTableProps> = ({
                 <SortIndicator field="posting_datetime" />
               </div>
             </TableHead>
-            <TableHead className="w-[5%] text-center text-xs font-bold uppercase tracking-wider text-muted-foreground/80 align-middle">
+            <TableHead className="w-[5%] text-center table-header leading-[1.4] align-middle">
               Actions
             </TableHead>
           </TableRow>
@@ -122,28 +123,28 @@ export const RentPaymentsTable: React.FC<RentPaymentsTableProps> = ({
               return (
                 <TableRow
                   key={payment.id}
-                  className="hover:bg-secondary/20 cursor-pointer transition-colors"
+                  className="hover:bg-secondary/20 cursor-pointer transition-colors h-[56px] min-h-[56px]"
                   onClick={() => router.push(`/rent-payments/${payment.id}`)}
                 >
                   {/* Rent Payment Code */}
-                  <TableCell className="font-semibold font-mono text-[13px] text-primary">
+                  <TableCell className="align-middle text-[15px] font-[500] text-[#0F172A] leading-[1.5]">
                     <span className="hover:underline">
                       {payment.name || payment.id.substring(0, 8).toUpperCase()}
                     </span>
                   </TableCell>
 
                   {/* Student Avatar + Profile Info */}
-                  <TableCell>
+                  <TableCell className="align-middle">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs border border-primary/20 shrink-0">
                         {studentInitials}
                       </div>
                       <div className="flex flex-col">
-                        <span className="font-bold text-foreground text-sm tracking-tight">
+                        <span className="text-[15px] font-[500] text-[#0F172A] leading-[1.5]">
                           {studentName}
                         </span>
                         {studentPassId && (
-                          <span className="text-xs font-mono text-muted-foreground font-medium mt-0.5">
+                          <span className="text-[14px] font-[400] text-[#64748B] leading-[1.5]">
                             {studentPassId}
                           </span>
                         )}
@@ -152,14 +153,14 @@ export const RentPaymentsTable: React.FC<RentPaymentsTableProps> = ({
                   </TableCell>
 
                   {/* Against Month */}
-                  <TableCell className="font-bold text-primary">
+                  <TableCell className="align-middle text-[15px] font-[500] text-[#0F172A] leading-[1.5]">
                     {payment.against_month}
                   </TableCell>
 
                   {/* Transaction Type / Direction badge */}
-                  <TableCell>
+                  <TableCell className="align-middle">
                     <div className="flex flex-col gap-1 items-start">
-                      <span className="font-semibold text-foreground text-sm tracking-tight">
+                      <span className="text-[15px] font-[500] text-[#0F172A] leading-[1.5]">
                         {payment.transaction_type}
                       </span>
                       {getDirectionBadge(payment.direction)}
@@ -167,13 +168,13 @@ export const RentPaymentsTable: React.FC<RentPaymentsTableProps> = ({
                   </TableCell>
 
                   {/* Amount with Stripe-like signs and coloring */}
-                  <TableCell>
+                  <TableCell className="align-middle">
                     {(() => {
                       const isCredit = payment.direction?.toLowerCase() === "credit";
                       const amountSign = isCredit ? "+" : "−";
                       const amountColor = isCredit ? "text-success" : "text-destructive";
                       return (
-                        <span className={`font-extrabold text-[15px] ${amountColor} tabular-nums`}>
+                        <span className={`text-[16px] font-[700] ${amountColor} tabular-nums leading-[1.5]`}>
                           {amountSign}{formatPrice(payment.amount)}
                         </span>
                       );
@@ -181,13 +182,13 @@ export const RentPaymentsTable: React.FC<RentPaymentsTableProps> = ({
                   </TableCell>
 
                   {/* Room Allotment Link */}
-                  <TableCell>
+                  <TableCell className="align-middle">
                     <div className="flex flex-col gap-1">
-                      <span className="font-semibold text-primary text-[13px] font-mono hover:underline truncate max-w-[120px]" title={payment.room_allotment_name || `RA-${payment.room_allotment_id.substring(0, 8).toUpperCase()}`}>
+                      <span className="text-[15px] font-[500] text-[#0F172A] hover:underline truncate max-w-[120px] leading-[1.5]" title={payment.room_allotment_name || `RA-${payment.room_allotment_id.substring(0, 8).toUpperCase()}`}>
                         {payment.room_allotment_name || `RA-${payment.room_allotment_id.substring(0, 8).toUpperCase()}`}
                       </span>
                       {payment.room_allotment_payment_name && (
-                        <span className="text-xs text-muted-foreground truncate max-w-[120px]" title={`Ref: ${payment.room_allotment_payment_name}`}>
+                        <span className="text-[14px] font-[400] text-[#64748B] truncate max-w-[120px] leading-[1.5]" title={`Ref: ${payment.room_allotment_payment_name}`}>
                           Ref: {payment.room_allotment_payment_name}
                         </span>
                       )}
@@ -195,35 +196,21 @@ export const RentPaymentsTable: React.FC<RentPaymentsTableProps> = ({
                   </TableCell>
 
                   {/* Posting Datetime */}
-                  <TableCell>
-                    <div className="inline-flex items-center gap-1.5 text-foreground/85 text-sm font-medium">
-                      <Calendar size={13} className="text-muted-foreground" />
+                  <TableCell className="align-middle">
+                    <div className="inline-flex items-center gap-1.5 text-[14px] font-[400] text-[#64748B] leading-[1.5]">
+                      <Calendar size={13} className="text-[#64748B]" />
                       <span>{formatDate(payment.posting_datetime)}</span>
                     </div>
                   </TableCell>
 
                   {/* Actions Column */}
                   <TableCell className="text-center align-middle" onClick={(e) => e.stopPropagation()}>
-                    <div className="flex gap-1 justify-center items-center">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => router.push(`/rent-payments/${payment.id}/edit`)}
-                        className="p-1.5 h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
-                        title="Edit payment"
-                      >
-                        <Edit3 size={15} />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onDelete(payment.id)}
-                        className="p-1.5 h-8 w-8 text-destructive hover:bg-destructive/10 transition-colors"
-                        title="Delete entry"
-                      >
-                        <Trash2 size={15} />
-                      </Button>
-                    </div>
+                    <ActionButtons 
+                      onView={() => router.push(`/rent-payments/${payment.id}`)}
+                      onEdit={() => router.push(`/rent-payments/${payment.id}/edit`)}
+                      onDelete={() => onDelete(payment.id)}
+                      deleteConfirmMessage="Are you sure you want to delete this rent payment?"
+                    />
                   </TableCell>
                 </TableRow>
               );

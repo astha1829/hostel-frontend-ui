@@ -3,7 +3,7 @@ import { HostelContractsApi } from "../api";
 import { HostelContract, HostelContractQueryParams } from "../types";
 import { Hostel } from "../../hostels/types";
 import { Student } from "../../students/types";
-import { showDeleteConfirm, showSuccess, showError, showLoading, closeLoading } from "@/utils/swal";
+import { showDeleteConfirm, showDeleteSuccess, showDeleteError, showLoading, closeLoading } from "@/utils/swal";
 
 export const useHostelContracts = () => {
   const [contracts, setContracts] = useState<HostelContract[]>([]);
@@ -104,11 +104,11 @@ export const useHostelContracts = () => {
     try {
       await HostelContractsApi.deleteHostelContract(id);
       closeLoading();
-      await showSuccess("Deleted Successfully", "Record has been removed successfully.");
+      await showDeleteSuccess();
       loadData();
     } catch (err: any) {
       closeLoading();
-      showError("Delete Failed", err.message || "Failed to delete hostel contract.");
+      await showDeleteError();
     }
   };
 

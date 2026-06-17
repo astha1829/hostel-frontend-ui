@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { RoomAllotmentPaymentsApi } from "../api";
 import { RoomAllotmentPayment } from "../types";
-import { showDeleteConfirm, showSuccess, showError, showLoading, closeLoading } from "@/utils/swal";
+import { showDeleteConfirm, showDeleteSuccess, showDeleteError, showLoading, closeLoading } from "@/utils/swal";
 
 export const useRoomAllotmentPaymentDetails = (id: string) => {
   const [payment, setPayment] = useState<RoomAllotmentPayment | null>(null);
@@ -36,11 +36,11 @@ export const useRoomAllotmentPaymentDetails = (id: string) => {
     try {
       await RoomAllotmentPaymentsApi.deleteRoomAllotmentPayment(id);
       closeLoading();
-      await showSuccess("Deleted Successfully", "Record has been removed successfully.");
+      await showDeleteSuccess();
       return true;
     } catch (err: any) {
       closeLoading();
-      showError("Delete Failed", err.message || "Failed to delete payment record.");
+      await showDeleteError();
       return false;
     }
   };

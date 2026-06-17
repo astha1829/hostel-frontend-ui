@@ -2,10 +2,8 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import { Trash2, Calendar, FileText, Edit3 } from "lucide-react";
-import { TableContainer, Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Calendar, FileText } from "lucide-react";
+import { ActionButtons } from "@/components/ui/action-buttons";
 import { HostelContract } from "../types";
 
 interface HostelContractsTableProps {
@@ -25,242 +23,191 @@ export const HostelContractsTable: React.FC<HostelContractsTableProps> = ({
 }) => {
   const router = useRouter();
 
+  if (!contracts || contracts.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-16">
+        <h3 className="text-[#111827] font-[700] text-[18px]">No Contracts Found</h3>
+        <p className="text-[#64748B] font-[500] mt-1 text-[14px]">No active hostel contracts match your search filters.</p>
+      </div>
+    );
+  }
+
   const getStatusBadge = (status?: string) => {
-    switch (status?.toLowerCase()) {
-      case "active":
-        return <Badge variant="success">Active</Badge>;
-      case "expired":
-        return <Badge variant="danger">Expired</Badge>;
-      case "break":
-        return <Badge variant="warning">Break</Badge>;
-      case "superseded":
-        return <Badge variant="secondary">Superseded</Badge>;
-      default:
-        return <Badge variant="secondary">{status || "Draft"}</Badge>;
+    const s = status?.toLowerCase();
+    if (s === "active") {
+      return (
+        <div className="inline-flex items-center justify-center h-[26px] px-[12px] rounded-full bg-[#DCFCE7] text-[#16A34A] text-[13px] font-[700]">
+          Active
+        </div>
+      );
     }
+    if (s === "expired") {
+      return (
+        <div className="inline-flex items-center justify-center h-[26px] px-[12px] rounded-full bg-[#FEE2E2] text-[#EF4444] text-[13px] font-[700]">
+          Expired
+        </div>
+      );
+    }
+    return (
+      <div className="inline-flex items-center justify-center h-[26px] px-[12px] rounded-full bg-[#F1F5F9] text-[#64748B] text-[13px] font-[700] capitalize">
+        {status || "Draft"}
+      </div>
+    );
   };
 
   const getConfirmBadge = (confirmStatus?: string) => {
-    switch (confirmStatus?.toLowerCase()) {
-      case "confirmed":
-        return <Badge variant="success">Confirmed</Badge>;
-      case "pending":
-        return <Badge variant="warning">Pending</Badge>;
-      case "rejected":
-        return <Badge variant="danger">Rejected</Badge>;
-      default:
-        return <Badge variant="secondary">{confirmStatus || "Draft"}</Badge>;
+    const s = confirmStatus?.toLowerCase();
+    if (s === "confirmed") {
+      return (
+        <div className="inline-flex items-center justify-center h-[26px] px-[12px] rounded-full bg-[#DCFCE7] text-[#16A34A] text-[13px] font-[700]">
+          Confirmed
+        </div>
+      );
     }
+    if (s === "pending") {
+      return (
+        <div className="inline-flex items-center justify-center h-[26px] px-[12px] rounded-full bg-[#FFEDD5] text-[#EA580C] text-[13px] font-[700]">
+          Pending Approval
+        </div>
+      );
+    }
+    return (
+      <div className="inline-flex items-center justify-center h-[26px] px-[12px] rounded-full bg-[#F1F5F9] text-[#64748B] text-[13px] font-[700] capitalize">
+        {confirmStatus || "Draft"}
+      </div>
+    );
   };
 
-  const formatPrice = (price?: number) => {
+  const formatPrice = (price?: number | string) => {
     if (price === undefined || price === null) return "—";
     return `$${Number(price).toFixed(2)}`;
   };
 
   const formatDate = (dateStr?: string) => {
     if (!dateStr) return "—";
-    return new Date(dateStr).toLocaleDateString(undefined, {
+    return new Date(dateStr).toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
-      day: "numeric",
+      day: "2-digit",
     });
   };
 
-  const SortIndicator = ({ field }: { field: string }) => {
-    if (sortBy !== field) return null;
-    return <span className="ml-1 text-xs">{sortOrder === "ASC" ? "▲" : "▼"}</span>;
+  const calculateDays = (start?: string, end?: string) => {
+    if (!start || !end) return "N/A";
+    const diffTime = Math.abs(new Date(end).getTime() - new Date(start).getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return `${diffDays} Day${diffDays !== 1 ? 's' : ''}`;
   };
 
   return (
-    <TableContainer className="border border-border/80 shadow-sm">
-      <Table>
-        <TableHeader>
-          <TableRow className="bg-secondary/30">
-            <TableHead 
-              className="w-[12%] cursor-pointer text-xs font-bold uppercase tracking-[0.06em] text-muted-foreground/80 hover:text-foreground transition-colors"
-              onClick={() => onSort("contract_no")}
-            >
-              <div className="flex items-center gap-1">
-                <span>Contract No</span>
-                <SortIndicator field="contract_no" />
-              </div>
-            </TableHead>
-            <TableHead 
-              className="w-[10%] cursor-pointer text-xs font-bold uppercase tracking-[0.06em] text-muted-foreground/80 hover:text-foreground transition-colors"
-              onClick={() => onSort("contract_type")}
-            >
-              <div className="flex items-center gap-1">
-                <span>Type</span>
-                <SortIndicator field="contract_type" />
-              </div>
-            </TableHead>
-            <TableHead className="w-[20%] text-xs font-bold uppercase tracking-[0.06em] text-muted-foreground/80">
-              Student
-            </TableHead>
-            <TableHead className="w-[18%] text-xs font-bold uppercase tracking-[0.06em] text-muted-foreground/80">
-              Hostel Allotment
-            </TableHead>
-            <TableHead 
-              className="w-[10%] cursor-pointer text-xs font-bold uppercase tracking-[0.06em] text-muted-foreground/80 hover:text-foreground transition-colors"
-              onClick={() => onSort("status")}
-            >
-              <div className="flex items-center gap-1">
-                <span>Status</span>
-                <SortIndicator field="status" />
-              </div>
-            </TableHead>
-            <TableHead 
-              className="w-[12%] cursor-pointer text-xs font-bold uppercase tracking-[0.06em] text-muted-foreground/80 hover:text-foreground transition-colors"
-              onClick={() => onSort("confirm_status")}
-            >
-              <div className="flex items-center gap-1">
-                <span>Approval</span>
-                <SortIndicator field="confirm_status" />
-              </div>
-            </TableHead>
-            <TableHead 
-              className="w-[10%] cursor-pointer text-xs font-bold uppercase tracking-[0.06em] text-muted-foreground/80 hover:text-foreground transition-colors"
-              onClick={() => onSort("contract_start_date")}
-            >
-              <div className="flex items-center gap-1">
-                <span>Timeline</span>
-                <SortIndicator field="contract_start_date" />
-              </div>
-            </TableHead>
-            <TableHead 
-              className="w-[8%] cursor-pointer text-xs font-bold uppercase tracking-[0.06em] text-muted-foreground/80 hover:text-foreground transition-colors"
-              onClick={() => onSort("contract_price")}
-            >
-              <div className="flex items-center gap-1">
-                <span>Price</span>
-                <SortIndicator field="contract_price" />
-              </div>
-            </TableHead>
-            <TableHead className="w-[5%] text-center align-middle text-xs font-bold uppercase tracking-[0.06em] text-muted-foreground/80">
-              Actions
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {contracts.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={9} className="text-center py-16 px-8 text-muted-foreground">
-                No active hostel contracts match your search filters.
-              </TableCell>
-            </TableRow>
-          ) : (
-            contracts.map((contract) => {
-              // Split student name and Registration ID
-              const [studentFullName, studentRegId] = contract.student_name
-                ? contract.student_name.split("-")
-                : ["Unlinked Student", ""];
+    <div className="w-full overflow-x-auto">
+      <table className="w-full text-left border-collapse min-w-[1200px]">
+        <thead className="sticky top-0 z-10 bg-[#FFFFFF]">
+          <tr className="bg-[#FFFFFF] border-b border-[#EAECEF]">
+            <th className="h-[44px] px-[20px] table-header leading-[1.4] align-middle whitespace-nowrap">CONTRACT NO</th>
+            <th className="h-[44px] px-[20px] table-header leading-[1.4] align-middle whitespace-nowrap">TYPE</th>
+            <th className="h-[44px] px-[20px] table-header leading-[1.4] align-middle whitespace-nowrap">STUDENT</th>
+            <th className="h-[44px] px-[20px] table-header leading-[1.4] align-middle whitespace-nowrap">HOSTEL & ALLOTMENT</th>
+            <th className="h-[44px] px-[20px] table-header leading-[1.4] align-middle whitespace-nowrap">STATUS</th>
+            <th className="h-[44px] px-[20px] table-header leading-[1.4] align-middle whitespace-nowrap">APPROVAL</th>
+            <th className="h-[44px] px-[20px] table-header leading-[1.4] align-middle whitespace-nowrap">DURATION</th>
+            <th className="h-[44px] px-[20px] table-header leading-[1.4] align-middle whitespace-nowrap">AMOUNT</th>
+            <th className="h-[44px] px-[20px] table-header leading-[1.4] align-middle whitespace-nowrap text-right">ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody>
+          {contracts.map((contract, index) => {
+            const [studentFullName, studentRegId] = contract.student_name
+              ? contract.student_name.split("-")
+              : ["Unlinked Student", ""];
 
-              return (
-                <TableRow
-                  key={contract.id}
-                  className="group cursor-pointer transition-colors hover:bg-muted/50"
-                  onClick={() => router.push(`/hostel-contracts/${contract.id}`)}
-                >
-                  {/* Contract No */}
-                  <TableCell className="font-bold text-primary align-middle">
-                    <div className="flex items-center gap-2">
-                      <FileText size={15} className="text-primary shrink-0" />
-                      <span className="underline decoration-primary/30 group-hover:decoration-primary/80 transition-colors font-mono text-[13px]">{contract.contract_no}</span>
-                    </div>
-                  </TableCell>
+            return (
+              <tr 
+                key={contract.id} 
+                className={`group hover:bg-[#F8FAFC] transition-all duration-200 ease-in-out h-[56px] min-h-[56px] ${index !== contracts.length - 1 ? 'border-b border-[#EAECEF]' : ''}`}
+              >
+                <td className="px-[20px] align-middle">
+                  <div 
+                    className="flex items-center gap-[8px] cursor-pointer group-hover:text-[#4a31d9]"
+                    onClick={() => router.push(`/hostel-contracts/${contract.id}`)}
+                  >
+                    <FileText size={16} className="text-[#5B3DF5]" strokeWidth={2} />
+                    <span className="text-[15px] font-[500] text-[#0F172A] hover:underline underline-offset-2">
+                      {contract.contract_no}
+                    </span>
+                  </div>
+                </td>
 
-                  {/* Contract Type */}
-                  <TableCell className="font-medium text-foreground align-middle">
+                <td className="px-[20px] align-middle">
+                  <span className="text-[15px] font-[500] text-[#0F172A] leading-[1.5]">
                     {contract.contract_type}
-                  </TableCell>
+                  </span>
+                </td>
 
-                  {/* Student */}
-                  <TableCell className="align-middle">
-                    <div className="flex flex-col">
-                      <span className="font-semibold text-foreground">
-                        {studentFullName}
-                      </span>
-                      {studentRegId && (
-                        <span className="text-xs font-mono text-muted-foreground mt-0.5">
-                          {studentRegId}
-                        </span>
-                      )}
-                    </div>
-                  </TableCell>
+                <td className="px-[20px] align-middle">
+                  <div className="flex flex-col gap-[2px]">
+                    <span className="text-[15px] font-[500] text-[#0F172A] tracking-tight">
+                      {studentFullName}
+                    </span>
+                    <span className="text-[14px] font-[400] text-[#64748B]">
+                      Reg: {studentRegId || contract.student_id?.substring(0, 10).toUpperCase()}
+                    </span>
+                  </div>
+                </td>
 
-                  {/* Hostel */}
-                  <TableCell className="align-middle">
-                    <div className="flex flex-col gap-1">
-                      <span className="font-semibold text-foreground">
-                        {contract.hostel_name || "Unassigned"}
-                      </span>
-                      {contract.sharing && (
-                        <div className="w-fit">
-                          <Badge variant="secondary" className="text-[11px] px-1.5 py-0.5">
-                            {contract.sharing} Sharing
-                          </Badge>
-                        </div>
-                      )}
-                    </div>
-                  </TableCell>
-
-                  {/* Status */}
-                  <TableCell className="align-middle">
-                    {getStatusBadge(contract.status)}
-                  </TableCell>
-
-                  {/* Confirm Status */}
-                  <TableCell className="align-middle">
-                    {getConfirmBadge(contract.confirm_status)}
-                  </TableCell>
-
-                  {/* Dates timeline */}
-                  <TableCell className="align-middle">
-                    <div className="flex items-center gap-2 text-[13px] text-foreground">
-                      <Calendar size={14} className="text-muted-foreground shrink-0" />
-                      <div className="flex items-center gap-1 whitespace-nowrap">
-                        <span className="font-semibold">{formatDate(contract.contract_start_date)}</span>
-                        <span className="text-muted-foreground">→</span>
-                        <span className="font-semibold">{formatDate(contract.contract_end_date)}</span>
+                <td className="px-[20px] align-middle">
+                  <div className="flex flex-col gap-[4px] items-start">
+                    <span className="text-[15px] font-[500] text-[#0F172A]">
+                      {contract.hostel_name || "Unassigned"}
+                    </span>
+                    {contract.sharing && (
+                      <div className="inline-flex items-center justify-center h-[22px] px-[8px] rounded-full bg-[#F1F5F9] text-[#475569] text-[13px] font-[700]">
+                        {contract.sharing} Sharing
                       </div>
-                    </div>
-                  </TableCell>
+                    )}
+                  </div>
+                </td>
 
-                  {/* Price Rate */}
-                  <TableCell className="font-bold text-primary text-base align-middle">
+                <td className="px-[20px] align-middle">
+                  {getStatusBadge(contract.status)}
+                </td>
+
+                <td className="px-[20px] align-middle">
+                  {getConfirmBadge(contract.confirm_status)}
+                </td>
+
+                <td className="px-[20px] align-middle">
+                  <div className="flex flex-col gap-[4px]">
+                    <div className="flex items-center gap-[6px] text-[#0F172A] text-[15px] font-[500] leading-[1.5]">
+                      <Calendar size={14} className="text-[#64748B]" />
+                      {calculateDays(contract.contract_start_date, contract.contract_end_date)}
+                    </div>
+                    <span className="text-[14px] font-[400] text-[#64748B] ml-[20px]">
+                      {formatDate(contract.contract_start_date)} - {formatDate(contract.contract_end_date)}
+                    </span>
+                  </div>
+                </td>
+
+                <td className="px-[20px] align-middle">
+                  <span className="text-[15px] font-[500] text-[#0F172A]">
                     {formatPrice(contract.contract_price)}
-                  </TableCell>
+                  </span>
+                </td>
 
-                  {/* Actions */}
-                  <TableCell className="text-center align-middle" onClick={(e) => e.stopPropagation()}>
-                    <div className="flex gap-1 justify-center items-center">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => router.push(`/hostel-contracts/${contract.id}`)}
-                        className="p-1.5 text-muted-foreground hover:text-foreground"
-                        title="Edit contract details"
-                      >
-                        <Edit3 size={14} />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onDelete(contract.id)}
-                        className="p-1.5 text-destructive hover:bg-destructive/10"
-                        title="Delete hostel contract"
-                      >
-                        <Trash2 size={14} />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              );
-            })
-          )}
-        </TableBody>
-      </Table>
-    </TableContainer>
+                <td className="px-[20px] align-middle" onClick={(e) => e.stopPropagation()}>
+                  <ActionButtons
+                    align="right"
+                    onView={() => router.push(`/hostel-contracts/${contract.id}`)}
+                    onEdit={() => router.push(`/hostel-contracts/${contract.id}/edit`)}
+                    onDelete={() => onDelete(contract.id)}
+                    deleteConfirmMessage="Are you sure you want to delete this hostel contract?"
+                  />
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
   );
 };

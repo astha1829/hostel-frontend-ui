@@ -3,7 +3,7 @@ import { CreateHostelFloorPayload } from "../types";
 import { HostelFloorsApi } from "../api";
 import { HostelApi } from "../../hostels/api";
 import { Hostel, HostelFloor } from "../../hostels/types";
-import { showSuccess, showError, showLoading, closeLoading } from "@/utils/swal";
+import { showDeleteSuccess, showDeleteError, showLoading, closeLoading, showSuccess, showError } from '@/utils/swal';
 
 interface UseHostelFloorFormProps {
   hostels: Hostel[];

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { StudentsApi } from "../api";
 import { Student, StudentQueryParams } from "../types";
-import { showDeleteConfirm, showSuccess, showError, showLoading, closeLoading } from "@/utils/swal";
+import { showDeleteConfirm, showDeleteSuccess, showDeleteError, showLoading, closeLoading } from "@/utils/swal";
 
 export const useStudents = () => {
   const [students, setStudents] = useState<Student[]>([]);
@@ -67,11 +67,11 @@ export const useStudents = () => {
     try {
       await StudentsApi.deleteStudent(id);
       closeLoading();
-      await showSuccess("Deleted Successfully", "Record has been removed successfully.");
+      await showDeleteSuccess();
       loadData();
     } catch (err: any) {
       closeLoading();
-      showError("Delete Failed", err.message || "Failed to delete student.");
+      await showDeleteError();
     }
   };
 

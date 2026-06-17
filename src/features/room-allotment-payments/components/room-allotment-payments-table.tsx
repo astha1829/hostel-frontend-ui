@@ -4,6 +4,7 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import { Trash2, Edit3 } from "lucide-react";
 import { TableContainer, Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
+import { ActionButtons } from "@/components/ui/action-buttons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { RoomAllotmentPayment } from "../types";
@@ -96,13 +97,13 @@ export const RoomAllotmentPaymentsTable: React.FC<RoomAllotmentPaymentsTableProp
     <TableContainer className="border border-border/80 shadow-sm">
       <Table>
         <TableHeader>
-          <TableRow>
-            <TableHead className="w-[10%]">Payment ID</TableHead>
-            <TableHead className="w-[18%]">Student</TableHead>
-            <TableHead className="w-[12%]">Room Allotment</TableHead>
-            <TableHead className="w-[12%]">Transaction Type</TableHead>
+          <TableRow className="bg-secondary/20 h-[44px]">
+            <TableHead className="w-[10%] table-header leading-[1.4] align-middle">Payment ID</TableHead>
+            <TableHead className="w-[18%] table-header leading-[1.4] align-middle">Student</TableHead>
+            <TableHead className="w-[12%] table-header leading-[1.4] align-middle">Room Allotment</TableHead>
+            <TableHead className="w-[12%] table-header leading-[1.4] align-middle">Transaction Type</TableHead>
             <TableHead 
-              className="w-[12%] cursor-pointer hover:bg-muted/50 transition-colors"
+              className="w-[12%] cursor-pointer hover:bg-muted/50 transition-colors table-header leading-[1.4] align-middle"
               onClick={() => onSort("total_amount")}
             >
               <div className="flex items-center gap-1">
@@ -110,9 +111,9 @@ export const RoomAllotmentPaymentsTable: React.FC<RoomAllotmentPaymentsTableProp
                 <SortIndicator field="total_amount" />
               </div>
             </TableHead>
-            <TableHead className="w-[10%]">Status</TableHead>
+            <TableHead className="w-[10%] table-header leading-[1.4] align-middle">Status</TableHead>
             <TableHead 
-              className="w-[13%] cursor-pointer hover:bg-muted/50 transition-colors"
+              className="w-[13%] cursor-pointer hover:bg-muted/50 transition-colors table-header leading-[1.4] align-middle"
               onClick={() => onSort("posting_datetime")}
             >
               <div className="flex items-center gap-1">
@@ -120,8 +121,8 @@ export const RoomAllotmentPaymentsTable: React.FC<RoomAllotmentPaymentsTableProp
                 <SortIndicator field="posting_datetime" />
               </div>
             </TableHead>
-            <TableHead className="w-[10%]">Payment Method</TableHead>
-            <TableHead className="w-[3%] text-center text-xs font-bold uppercase tracking-[0.06em] text-muted-foreground/80 align-middle">
+            <TableHead className="w-[10%] table-header leading-[1.4] align-middle">Payment Method</TableHead>
+            <TableHead className="w-[3%] text-center table-header leading-[1.4] align-middle">
               Actions
             </TableHead>
           </TableRow>
@@ -149,91 +150,77 @@ export const RoomAllotmentPaymentsTable: React.FC<RoomAllotmentPaymentsTableProp
               return (
                 <TableRow
                   key={payment.id}
-                  className="table-tr cursor-pointer hover:bg-muted/30 transition-colors duration-150"
+                  className="cursor-pointer hover:bg-muted/30 transition-colors duration-150 h-[56px] min-h-[56px]"
                   onClick={() => router.push(`/room-allotment-payments/${payment.id}`)}
                 >
                   {/* Payment ID (Monospace substring) */}
-                  <TableCell className="table-td table-td-mono font-semibold">
-                    <span className="hover-underline text-primary">
+                  <TableCell className="align-middle">
+                    <span className="text-[15px] font-[500] text-[#0F172A] leading-[1.5] hover:underline">
                       {payment.id.substring(0, 8).toUpperCase()}
                     </span>
                   </TableCell>
 
                   {/* Student */}
-                  <TableCell className="table-td">
+                  <TableCell className="align-middle">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs border border-primary/10 shrink-0">
                         {studentInitials}
                       </div>
-                      <span className="font-semibold text-foreground">
+                      <span className="text-[15px] font-[500] text-[#0F172A] leading-[1.5]">
                         {studentName}
                       </span>
                     </div>
                   </TableCell>
 
                   {/* Room Allotment */}
-                  <TableCell className="table-td table-td-mono font-medium">
+                  <TableCell className="align-middle text-[15px] font-[500] text-[#0F172A] leading-[1.5]">
                     {payment.room_allotment_name || `RA-${payment.room_allotment_id.substring(0, 8).toUpperCase()}`}
                   </TableCell>
 
                   {/* Transaction Type Badge */}
-                  <TableCell className="table-td">
+                  <TableCell className="align-middle">
                     {getTransactionTypeBadge(payment.transaction_type)}
                   </TableCell>
 
                   {/* Amount with Transaction Type underneath */}
-                  <TableCell className="table-td">
+                  <TableCell className="align-middle">
                     <div className="flex flex-col">
-                      <span className="font-bold text-foreground">
+                      <span className="text-[15px] font-[500] text-[#0F172A] leading-[1.5]">
                         {formatPrice(payment.total_amount)}
                       </span>
-                      <span className="text-xs text-muted-foreground mt-0.5">
+                      <span className="text-[14px] font-[400] text-[#64748B] mt-0.5 leading-[1.5]">
                         {payment.transaction_type}
                       </span>
                     </div>
                   </TableCell>
 
                   {/* Status Badge */}
-                  <TableCell className="table-td">
+                  <TableCell className="align-middle">
                     {getStatusBadge(payment.payment_status)}
                   </TableCell>
 
                   {/* Payment Date */}
-                  <TableCell className="table-td">
-                    <span className="text-sm font-medium text-foreground/85">
+                  <TableCell className="align-middle">
+                    <span className="text-[14px] font-[400] text-[#64748B] leading-[1.5]">
                       {formatDate(payment.posting_datetime || payment.created_at)}
                     </span>
                   </TableCell>
 
                   {/* Payment Method */}
-                  <TableCell className="table-td">
-                    <span className="text-sm font-medium text-foreground/85">
+                  <TableCell className="align-middle">
+                    <span className="text-[15px] font-[500] text-[#0F172A] leading-[1.5]">
                       {getPaymentMethod(payment)}
                     </span>
                   </TableCell>
 
                   {/* Actions Column */}
-                  <TableCell className="table-td text-center align-middle" onClick={(e) => e.stopPropagation()}>
-                    <div className="flex gap-1 justify-center items-center">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => router.push(`/room-allotment-payments/${payment.id}/edit`)}
-                        className="p-1.5 rounded-sm text-muted-foreground inline-flex items-center justify-center transition-colors hover:text-foreground hover:bg-muted"
-                        title="Edit payment"
-                      >
-                        <Edit3 size={14} />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onDelete(payment.id)}
-                        className="p-1.5 rounded-sm text-destructive inline-flex items-center justify-center transition-colors hover:bg-destructive/10"
-                        title="Delete payment"
-                      >
-                        <Trash2 size={14} />
-                      </Button>
-                    </div>
+                  <TableCell className="text-center align-middle" onClick={(e) => e.stopPropagation()}>
+                    <ActionButtons 
+                      onView={() => router.push(`/room-allotment-payments/${payment.id}`)}
+                      onEdit={() => router.push(`/room-allotment-payments/${payment.id}/edit`)}
+                      onDelete={() => onDelete(payment.id)}
+                      deleteConfirmMessage="Are you sure you want to delete this payment?"
+                    />
                   </TableCell>
                 </TableRow>
               );

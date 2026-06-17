@@ -29,14 +29,49 @@ export const showError = async (title: string, text: string) => {
  */
 export const showDeleteConfirm = async (text: string = "This action cannot be undone.") => {
   return Swal.fire({
-    title: 'Are you sure?',
+    title: "Delete Record?",
     text,
-    icon: 'warning',
+    icon: "warning",
     showCancelButton: true,
-    confirmButtonColor: '#EF4444',
-    cancelButtonColor: '#6B7280',
-    confirmButtonText: 'Yes, Delete',
-    cancelButtonText: 'Cancel'
+    confirmButtonColor: "#EF4444",
+    cancelButtonColor: "#E5E7EB",
+    confirmButtonText: "Delete",
+    cancelButtonText: "Cancel",
+    reverseButtons: true,
+    customClass: {
+      popup: "rounded-xl",
+      cancelButton: "text-slate-700 font-medium"
+    }
+  });
+};
+
+/**
+ * Shows a standard delete success dialog.
+ */
+export const showDeleteSuccess = async () => {
+  return Swal.fire({
+    icon: "success",
+    title: "Deleted!",
+    text: "Record deleted successfully.",
+    timer: 2000,
+    showConfirmButton: false,
+    customClass: {
+      popup: "rounded-xl"
+    }
+  });
+};
+
+/**
+ * Shows a standard delete error dialog.
+ */
+export const showDeleteError = async () => {
+  return Swal.fire({
+    title: "Error",
+    text: "Unable to delete record. Please try again.",
+    icon: "error",
+    customClass: {
+      popup: "rounded-xl"
+    }
   });
 };
 

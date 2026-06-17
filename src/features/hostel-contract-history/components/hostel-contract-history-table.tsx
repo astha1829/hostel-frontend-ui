@@ -3,7 +3,7 @@
 import React from "react";
 import { Trash2, Edit3, Calendar, FileText } from "lucide-react";
 import { TableContainer, Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
+import { ActionButtons } from "@/components/ui/action-buttons";
 import { Badge } from "@/components/ui/badge";
 import { HostelContractHistoryRow } from "../types";
 
@@ -43,15 +43,15 @@ export const HostelContractHistoryTable: React.FC<HostelContractHistoryTableProp
     <TableContainer style={{ border: "1px solid hsl(var(--border) / 0.8)", boxShadow: "var(--shadow-sm)", overflow: "visible" }}>
       <Table>
         <TableHeader>
-          <TableRow>
-            <TableHead style={{ width: "15%", verticalAlign: "middle" }}>
+          <TableRow className="h-[44px] bg-secondary/20">
+            <TableHead className="w-[15%] align-middle table-header leading-[1.4]">
               Event ID
             </TableHead>
-            <TableHead style={{ width: "25%", verticalAlign: "middle" }}>
+            <TableHead className="w-[25%] align-middle table-header leading-[1.4]">
               Student
             </TableHead>
             <TableHead 
-              style={{ width: "25%", cursor: "pointer", verticalAlign: "middle" }}
+              className="w-[25%] cursor-pointer align-middle table-header leading-[1.4]"
               onClick={() => onSort("contract_ref")}
             >
               <div style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}>
@@ -60,7 +60,7 @@ export const HostelContractHistoryTable: React.FC<HostelContractHistoryTableProp
               </div>
             </TableHead>
             <TableHead 
-              style={{ width: "15%", cursor: "pointer", verticalAlign: "middle" }}
+              className="w-[15%] cursor-pointer align-middle table-header leading-[1.4]"
               onClick={() => onSort("display_order")}
             >
               <div style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}>
@@ -69,7 +69,7 @@ export const HostelContractHistoryTable: React.FC<HostelContractHistoryTableProp
               </div>
             </TableHead>
             <TableHead 
-              style={{ width: "15%", cursor: "pointer", verticalAlign: "middle" }}
+              className="w-[15%] cursor-pointer align-middle table-header leading-[1.4]"
               onClick={() => onSort("created_at")}
             >
               <div style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}>
@@ -77,18 +77,7 @@ export const HostelContractHistoryTable: React.FC<HostelContractHistoryTableProp
                 <SortIndicator field="created_at" />
               </div>
             </TableHead>
-            <TableHead 
-              style={{ 
-                width: "5%", 
-                textAlign: "center", 
-                fontSize: "0.75rem", 
-                fontWeight: 700, 
-                textTransform: "uppercase", 
-                letterSpacing: "0.06em", 
-                color: "hsl(var(--muted-foreground) / 1.3)",
-                verticalAlign: "middle"
-              }}
-            >
+            <TableHead className="w-[5%] text-center align-middle table-header leading-[1.4]">
               Actions
             </TableHead>
           </TableRow>
@@ -118,18 +107,20 @@ export const HostelContractHistoryTable: React.FC<HostelContractHistoryTableProp
               return (
                 <TableRow
                   key={row.id}
-                  className="table-tr"
+                  className="table-tr h-[56px] min-h-[56px]"
                   style={{ 
                     transition: "background-color 0.2s ease",
                   }}
                 >
                   {/* Event No (compact ID) */}
-                  <TableCell className="table-td table-td-mono" style={{ verticalAlign: "middle", fontWeight: 600 }}>
-                    {row.id.substring(0, 8).toUpperCase()}
+                  <TableCell className="align-middle">
+                    <span className="text-[15px] font-[500] text-[#0F172A] leading-[1.5]">
+                      {row.id.substring(0, 8).toUpperCase()}
+                    </span>
                   </TableCell>
 
                   {/* Student */}
-                  <TableCell className="table-td" style={{ verticalAlign: "middle" }}>
+                  <TableCell className="align-middle">
                     <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
                       <div style={{
                         width: "2.25rem",
@@ -148,18 +139,11 @@ export const HostelContractHistoryTable: React.FC<HostelContractHistoryTableProp
                         {studentInitials}
                       </div>
                       <div style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
-                        <span style={{ fontWeight: 600, color: "hsl(var(--foreground))", lineHeight: 1.2 }}>
+                        <span className="text-[15px] font-[500] text-[#0F172A] leading-[1.5]">
                           {studentName}
                         </span>
                         {studentPassId && (
-                          <span style={{ 
-                            fontSize: "0.75rem", 
-                            fontFamily: "var(--font-mono, monospace)", 
-                            color: "hsl(var(--muted-foreground))", 
-                            marginTop: "0.1875rem",
-                            fontWeight: 500,
-                            lineHeight: 1
-                          }}>
+                          <span className="text-[14px] font-[400] text-[#64748B] mt-0.5 leading-[1.5]">
                             {studentPassId}
                           </span>
                         )}
@@ -168,19 +152,14 @@ export const HostelContractHistoryTable: React.FC<HostelContractHistoryTableProp
                   </TableCell>
 
                   {/* Contract Reference */}
-                  <TableCell className="table-td" style={{ verticalAlign: "middle" }}>
+                  <TableCell className="align-middle">
                     <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                       <FileText size={16} style={{ color: "hsl(var(--primary))", flexShrink: 0 }} />
                       <div style={{ display: "flex", flexDirection: "column" }}>
-                        <span style={{ 
-                          fontWeight: 700, 
-                          fontFamily: "var(--font-mono, monospace)", 
-                          fontSize: "0.875rem",
-                          color: "hsl(var(--foreground))"
-                        }}>
+                        <span className="text-[15px] font-[500] text-[#0F172A] leading-[1.5]">
                           {row.contract_ref}
                         </span>
-                        <span style={{ fontSize: "0.7125rem", color: "hsl(var(--muted-foreground))", fontWeight: 500 }}>
+                        <span className="text-[14px] font-[400] text-[#64748B] leading-[1.5]">
                           Historical Contract Reference
                         </span>
                       </div>
@@ -188,7 +167,7 @@ export const HostelContractHistoryTable: React.FC<HostelContractHistoryTableProp
                   </TableCell>
 
                   {/* Display Order */}
-                  <TableCell className="table-td" style={{ verticalAlign: "middle" }}>
+                  <TableCell className="align-middle">
                     {(() => {
                       const order = row.display_order ?? 1;
                       let label = `${order} Position`;
@@ -199,10 +178,10 @@ export const HostelContractHistoryTable: React.FC<HostelContractHistoryTableProp
                       
                       return (
                         <div style={{ display: "flex", flexDirection: "column", gap: "0.125rem" }}>
-                          <span style={{ fontFamily: "var(--font-mono, monospace)", fontWeight: 700, fontSize: "0.875rem", color: "hsl(var(--primary))" }}>
+                          <span className="text-[16px] font-[700] text-primary leading-[1.5]">
                             #{order}
                           </span>
-                          <span style={{ fontSize: "0.6875rem", color: "hsl(var(--muted-foreground))", fontWeight: 500 }}>
+                          <span className="text-[14px] font-[400] text-[#64748B] leading-[1.5]">
                             {label}
                           </span>
                         </div>
@@ -211,35 +190,20 @@ export const HostelContractHistoryTable: React.FC<HostelContractHistoryTableProp
                   </TableCell>
 
                   {/* Created At */}
-                  <TableCell className="table-td" style={{ verticalAlign: "middle" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", color: "hsl(var(--muted-foreground))", fontSize: "0.8125rem" }}>
+                  <TableCell className="align-middle">
+                    <div className="flex items-center gap-1.5 text-[14px] font-[400] text-[#64748B] leading-[1.5]">
                       <Calendar size={14} style={{ flexShrink: 0 }} />
                       <span>{formatDate(row.created_at)}</span>
                     </div>
                   </TableCell>
 
                   {/* Actions */}
-                  <TableCell className="table-td" style={{ textAlign: "center", verticalAlign: "middle" }}>
-                    <div style={{ display: "flex", gap: "0.25rem", justifyContent: "center", alignItems: "center" }}>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onEdit(row)}
-                        style={{ padding: "0.375rem", borderRadius: "var(--radius-sm)", color: "hsl(var(--muted-foreground) / 1.3)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}
-                        title="Edit log"
-                      >
-                        <Edit3 size={14} />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onDelete(row.id)}
-                        style={{ padding: "0.375rem", borderRadius: "var(--radius-sm)", color: "hsl(var(--destructive))", display: "inline-flex", alignItems: "center", justifyContent: "center" }}
-                        title="Delete log"
-                      >
-                        <Trash2 size={14} />
-                      </Button>
-                    </div>
+                  <TableCell className="text-center align-middle">
+                    <ActionButtons 
+                      onEdit={() => onEdit(row)}
+                      onDelete={() => onDelete(row.id)}
+                      deleteConfirmMessage="Are you sure you want to delete this log?"
+                    />
                   </TableCell>
                 </TableRow>
               );

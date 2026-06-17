@@ -65,7 +65,7 @@ export const RentPaymentsListPage: React.FC = () => {
   ];
 
   return (
-    <div className="flex flex-col gap-6 animate-in slide-in-from-bottom-4 duration-500">
+    <div className="container-page flex flex-col gap-4 animate-in slide-in-from-bottom-4 duration-500">
       {/* Page Header */}
       <PageHeader
         title="Rent Payments"
@@ -107,11 +107,7 @@ export const RentPaymentsListPage: React.FC = () => {
                 value={selectedStudentId}
                 onChange={(e) => setSelectedStudentId(e.target.value)}
                 options={studentOptions}
-                className="pl-10 bg-card border-border/80 text-sm h-10"
-              />
-              <Users
-                size={16}
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none z-10"
+                className="bg-card border-border/80 h-[44px]"
               />
             </div>
 
@@ -121,11 +117,7 @@ export const RentPaymentsListPage: React.FC = () => {
                 value={selectedTransactionType}
                 onChange={(e) => setSelectedTransactionType(e.target.value)}
                 options={transactionTypeOptions}
-                className="pl-10 bg-card border-border/80 text-sm h-10"
-              />
-              <DollarSign
-                size={16}
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none z-10"
+                className="bg-card border-border/80 h-[44px]"
               />
             </div>
 
@@ -135,11 +127,7 @@ export const RentPaymentsListPage: React.FC = () => {
                 value={selectedDirection}
                 onChange={(e) => setSelectedDirection(e.target.value)}
                 options={directionOptions}
-                className="pl-10 bg-card border-border/80 text-sm h-10"
-              />
-              <Shield
-                size={16}
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none z-10"
+                className="bg-card border-border/80 h-[44px]"
               />
             </div>
 
@@ -172,7 +160,7 @@ export const RentPaymentsListPage: React.FC = () => {
       ) : isLoading ? (
         <TableSkeleton rows={6} />
       ) : (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 mt-[18px]">
           <RentPaymentsTable
             payments={payments}
             sortBy={sortBy}

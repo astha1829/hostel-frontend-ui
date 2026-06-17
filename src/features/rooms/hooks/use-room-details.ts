@@ -1,16 +1,16 @@
 import { useState, useEffect } from "react";
 import { RoomsApi } from "../api";
 import { HostelRoom, UpdateHostelRoomPayload } from "../types";
-import { showSuccess, showError, showLoading, closeLoading } from "@/utils/swal";
+import { showDeleteSuccess, showDeleteError, showLoading, closeLoading, showSuccess, showError } from '@/utils/swal';
 
-export const useRoomDetails = (id: string) => {
+export const useRoomDetails = (id: string, initialEditMode: boolean = false) => {
   const [room, setRoom] = useState<HostelRoom | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
   // In-place inline edit mode state
-  const [isEditMode, setIsEditMode] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(initialEditMode);
   const [formData, setFormData] = useState<UpdateHostelRoomPayload>({});
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [successMessage, setSuccessMessage] = useState<string | null>(null);

@@ -3,9 +3,9 @@ import { HostelContractsApi } from "../api";
 import { HostelContract, UpdateHostelContractPayload, HostelContractEvent } from "../types";
 import { Hostel } from "../../hostels/types";
 import { Student } from "../../students/types";
-import { showSuccess, showError, showLoading, closeLoading } from "@/utils/swal";
+import { showDeleteSuccess, showDeleteError, showLoading, closeLoading, showSuccess, showError } from '@/utils/swal';
 
-export const useHostelContractDetails = (id: string) => {
+export const useHostelContractDetails = (id: string, initialEditMode: boolean = false) => {
   const [contract, setContract] = useState<HostelContract | null>(null);
   const [hostels, setHostels] = useState<Hostel[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
@@ -15,7 +15,7 @@ export const useHostelContractDetails = (id: string) => {
   const [error, setError] = useState<string | null>(null);
 
   // Inline edit state
-  const [isEditMode, setIsEditMode] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(initialEditMode);
   const [formData, setFormData] = useState<UpdateHostelContractPayload>({});
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [successMessage, setSuccessMessage] = useState<string | null>(null);

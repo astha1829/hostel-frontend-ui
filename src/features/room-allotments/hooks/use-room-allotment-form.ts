@@ -6,14 +6,15 @@ import { Student } from "../../students/types";
 import { HostelContract } from "../../hostel-contracts/types";
 import { HostelFloor } from "../../hostel-floors/types";
 import { HostelRoom } from "../../rooms/types";
-import { showSuccess, showError, showLoading, closeLoading } from "@/utils/swal";
+import { showDeleteSuccess, showDeleteError, showLoading, closeLoading, showSuccess, showError } from '@/utils/swal';
 
 interface UseRoomAllotmentFormProps {
+  id?: string;
   onSuccess: (id: string) => void;
   onCancel: () => void;
 }
 
-export const useRoomAllotmentForm = ({ onSuccess, onCancel }: UseRoomAllotmentFormProps) => {
+export const useRoomAllotmentForm = ({ id, onSuccess, onCancel }: UseRoomAllotmentFormProps) => {
   const [formData, setFormData] = useState<CreateRoomAllotmentPayload>({
     hostel_id: "",
     student_id: "",
@@ -48,30 +49,68 @@ export const useRoomAllotmentForm = ({ onSuccess, onCancel }: UseRoomAllotmentFo
         setHostels(hostelsList);
         setStudents(studentsList);
 
-        // Auto select first option values if available
-        if (hostelsList.length > 0) {
-          const firstHostelId = hostelsList[0].id;
-          setFormData((prev) => ({ ...prev, hostel_id: firstHostelId }));
-          const floorsList = await RoomAllotmentsApi.getHostelFloorsList(firstHostelId).catch(() => []);
-          setFloors(floorsList);
-          if (floorsList.length > 0) {
-            const firstFloorNo = floorsList[0].floor_no;
-            setFormData((prev) => ({ ...prev, floor_no: firstFloorNo }));
-            const roomsList = await RoomAllotmentsApi.getFloorRoomsList(floorsList[0].id).catch(() => []);
-            setRooms(roomsList);
-            if (roomsList.length > 0) {
-              setFormData((prev) => ({ ...prev, room_no: roomsList[0].room_no }));
+        if (id) {
+          // Edit mode
+          try {
+            const allotment = await RoomAllotmentsApi.getRoomAllotmentById(id);
+            setFormData({
+              hostel_id: allotment.hostel_id || "",
+              student_id: allotment.student_id || "",
+              hostel_contract_id: allotment.hostel_contract_id || "",
+              floor_no: allotment.floor_no || 0,
+              room_no: allotment.room_no || "",
+              rent: allotment.rent || 0,
+              status: allotment.status || "Active",
+              remarks: allotment.remarks || "",
+              add_transaction_charge: allotment.add_transaction_charge || false,
+            });
+
+            // Fetch dependent options based on existing data
+            if (allotment.hostel_id) {
+              const floorsList = await RoomAllotmentsApi.getHostelFloorsList(allotment.hostel_id).catch(() => []);
+              setFloors(floorsList);
+              if (allotment.floor_no) {
+                const selectedFloor = floorsList.find(f => Number(f.floor_no) === Number(allotment.floor_no));
+                if (selectedFloor) {
+                  const roomsList = await RoomAllotmentsApi.getFloorRoomsList(selectedFloor.id).catch(() => []);
+                  setRooms(roomsList);
+                }
+              }
+            }
+
+            if (allotment.student_id) {
+              const contractsList = await RoomAllotmentsApi.getHostelContractsList(allotment.student_id).catch(() => []);
+              setContracts(contractsList);
+            }
+          } catch (err) {
+            console.error("Failed to load allotment for editing", err);
+          }
+        } else {
+          // Create mode: auto select first option values if available
+          if (hostelsList.length > 0) {
+            const firstHostelId = hostelsList[0].id;
+            setFormData((prev) => ({ ...prev, hostel_id: firstHostelId }));
+            const floorsList = await RoomAllotmentsApi.getHostelFloorsList(firstHostelId).catch(() => []);
+            setFloors(floorsList);
+            if (floorsList.length > 0) {
+              const firstFloorNo = floorsList[0].floor_no;
+              setFormData((prev) => ({ ...prev, floor_no: firstFloorNo }));
+              const roomsList = await RoomAllotmentsApi.getFloorRoomsList(floorsList[0].id).catch(() => []);
+              setRooms(roomsList);
+              if (roomsList.length > 0) {
+                setFormData((prev) => ({ ...prev, room_no: roomsList[0].room_no }));
+              }
             }
           }
-        }
 
-        if (studentsList.length > 0) {
-          const firstStudentId = studentsList[0].id;
-          setFormData((prev) => ({ ...prev, student_id: firstStudentId }));
-          const contractsList = await RoomAllotmentsApi.getHostelContractsList(firstStudentId).catch(() => []);
-          setContracts(contractsList);
-          if (contractsList.length > 0) {
-            setFormData((prev) => ({ ...prev, hostel_contract_id: contractsList[0].id }));
+          if (studentsList.length > 0) {
+            const firstStudentId = studentsList[0].id;
+            setFormData((prev) => ({ ...prev, student_id: firstStudentId }));
+            const contractsList = await RoomAllotmentsApi.getHostelContractsList(firstStudentId).catch(() => []);
+            setContracts(contractsList);
+            if (contractsList.length > 0) {
+              setFormData((prev) => ({ ...prev, hostel_contract_id: contractsList[0].id }));
+            }
           }
         }
       } catch (err: any) {
@@ -81,7 +120,7 @@ export const useRoomAllotmentForm = ({ onSuccess, onCancel }: UseRoomAllotmentFo
       }
     };
     loadInitialOptions();
-  }, []);
+  }, [id]);
 
   const handleInputChange = (field: keyof CreateRoomAllotmentPayload, value: any) => {
     setFormData((prev) => ({
@@ -194,7 +233,7 @@ export const useRoomAllotmentForm = ({ onSuccess, onCancel }: UseRoomAllotmentFo
     if (!validateForm()) return;
     setIsSubmitting(true);
     setApiError(null);
-    showLoading("Creating allotment...", "Please wait");
+    showLoading(id ? "Updating allotment..." : "Creating allotment...", "Please wait");
 
     try {
       const payload = { ...formData };
@@ -203,14 +242,21 @@ export const useRoomAllotmentForm = ({ onSuccess, onCancel }: UseRoomAllotmentFo
       }
       payload.floor_no = Number(payload.floor_no);
 
-      const res = await RoomAllotmentsApi.createRoomAllotment(payload);
-      closeLoading();
-      await showSuccess("Created Successfully", "Record has been created successfully.");
-      onSuccess(res.id);
+      let res;
+      if (id) {
+        res = await RoomAllotmentsApi.updateRoomAllotment(id, payload);
+        closeLoading();
+        await showSuccess("Updated Successfully", "Record has been updated successfully.");
+      } else {
+        res = await RoomAllotmentsApi.createRoomAllotment(payload);
+        closeLoading();
+        await showSuccess("Created Successfully", "Record has been created successfully.");
+      }
+      onSuccess(id || res.id);
     } catch (err: any) {
       closeLoading();
-      setApiError(err.message || "Failed to create room allotment.");
-      showError("Creation Failed", err.message || "Failed to create room allotment.");
+      setApiError(err.message || (id ? "Failed to update room allotment." : "Failed to create room allotment."));
+      showError(id ? "Update Failed" : "Creation Failed", err.message || (id ? "Failed to update room allotment." : "Failed to create room allotment."));
     } finally {
       setIsSubmitting(false);
     }

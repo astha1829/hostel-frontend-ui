@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { HostelContractEventsApi } from "../api";
 import { HostelContractEvent } from "../types";
-import { showDeleteConfirm, showSuccess, showError, showLoading, closeLoading } from "@/utils/swal";
+import { showDeleteConfirm, showDeleteSuccess, showDeleteError, showLoading, closeLoading } from "@/utils/swal";
 
 export const useHostelContractEventDetails = (id: string) => {
   const [event, setEvent] = useState<HostelContractEvent | null>(null);
@@ -34,11 +34,11 @@ export const useHostelContractEventDetails = (id: string) => {
     try {
       await HostelContractEventsApi.deleteHostelContractEvent(id);
       closeLoading();
-      await showSuccess("Deleted Successfully", "Record has been removed successfully.");
+      await showDeleteSuccess();
       return true;
     } catch (err: any) {
       closeLoading();
-      showError("Delete Failed", err.message || "Failed to delete hostel contract event.");
+      await showDeleteError();
       return false;
     }
   };

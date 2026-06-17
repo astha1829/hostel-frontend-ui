@@ -15,7 +15,7 @@ import { Student } from "../../students/types";
 import { HostelContract } from "../../hostel-contracts/types";
 import { HostelFloor } from "../../hostel-floors/types";
 import { HostelRoom } from "../../rooms/types";
-import { showSuccess, showError, showLoading, closeLoading } from "@/utils/swal";
+import { showDeleteSuccess, showDeleteError, showLoading, closeLoading, showSuccess, showError } from '@/utils/swal';
 
 export const useRoomAllotmentDetails = (id: string) => {
   const [allotment, setAllotment] = useState<RoomAllotment | null>(null);

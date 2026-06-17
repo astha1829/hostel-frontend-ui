@@ -38,6 +38,7 @@ export const StudentsApi = {
       profile_pic?: File | null;
       passport_image_1?: File | null;
       passport_image_2?: File | null;
+      passport?: File | null;
     }
   ): Promise<Student> => {
     const formData = new FormData();
@@ -51,6 +52,9 @@ export const StudentsApi = {
     }
     if (files.passport_image_2) {
       formData.append("passport_image_2", files.passport_image_2);
+    }
+    if (files.passport) {
+      formData.append("passport", files.passport);
     }
 
     return await http.post<Student>(API_ENDPOINTS.STUDENTS.CREATE, formData);
@@ -66,6 +70,7 @@ export const StudentsApi = {
       profile_pic?: File | null;
       passport_image_1?: File | null;
       passport_image_2?: File | null;
+      passport?: File | null;
     }
   ): Promise<Student> => {
     const formData = new FormData();
@@ -79,6 +84,9 @@ export const StudentsApi = {
     }
     if (files.passport_image_2) {
       formData.append("passport_image_2", files.passport_image_2);
+    }
+    if (files.passport) {
+      formData.append("passport", files.passport);
     }
 
     return await http.patch<Student>(

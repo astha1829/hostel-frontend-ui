@@ -1,11 +1,9 @@
 "use client";
 import React from "react";
 import { useRouter } from "next/navigation";
-import { Trash2, Calendar, FileText, Home, UserCheck, Layers, Building2, Edit3 } from "lucide-react";
-import { TableContainer, Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Trash2, Edit2, Eye, Building2, MapPin, Bed, FileText, Calendar, Layers } from "lucide-react";
 import { RoomAllotment } from "../types";
+import { ActionButtons } from "@/components/ui/action-buttons";
 
 interface RoomAllotmentsTableProps {
   allotments: RoomAllotment[];
@@ -24,208 +22,165 @@ export const RoomAllotmentsTable: React.FC<RoomAllotmentsTableProps> = ({
 }) => {
   const router = useRouter();
 
-  const getStatusBadge = (status?: string) => {
-    switch (status?.toLowerCase()) {
-      case "active":
-        return <Badge variant="success">Active</Badge>;
-      case "inactive":
-        return <Badge variant="secondary">Inactive</Badge>;
-      case "pending":
-        return <Badge variant="warning">Pending</Badge>;
-      default:
-        return <Badge variant="secondary">{status || "Draft"}</Badge>;
-    }
-  };
-
-  const formatPrice = (price?: number | null) => {
-    if (price === undefined || price === null) return "—";
-    return `$${Number(price).toFixed(2)}`;
-  };
-
-  const SortIndicator = ({ field }: { field: string }) => {
-    if (sortBy !== field) return null;
-    return <span className="ml-1 text-xs">{sortOrder === "ASC" ? "▲" : "▼"}</span>;
-  };
-
   return (
-    <TableContainer>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[26%]">
-              Student
-            </TableHead>
-            <TableHead className="w-[20%]">
-              Hostel & Location
-            </TableHead>
-            <TableHead 
-              className="w-[12%] cursor-pointer hover:bg-muted/50 transition-colors"
-              onClick={() => onSort("room_no")}
-            >
-              <div className="flex items-center gap-1">
-                <span>Room / Floor</span>
-                <SortIndicator field="room_no" />
-              </div>
-            </TableHead>
-            <TableHead className="w-[16%]">
-              Hostel Contract
-            </TableHead>
-            <TableHead 
-              className="w-[12%] cursor-pointer hover:bg-muted/50 transition-colors"
-              onClick={() => onSort("rent")}
-            >
-              <div className="flex items-center gap-1">
-                <span>Monthly Rent</span>
-                <SortIndicator field="rent" />
-              </div>
-            </TableHead>
-            <TableHead 
-              className="w-[10%] cursor-pointer hover:bg-muted/50 transition-colors"
-              onClick={() => onSort("status")}
-            >
-              <div className="flex items-center gap-1">
-                <span>Status</span>
-                <SortIndicator field="status" />
-              </div>
-            </TableHead>
-            <TableHead className="w-[4%] text-center text-xs font-bold uppercase tracking-widest text-muted-foreground/80 align-middle">
-              Actions
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
+    <div className="w-full overflow-x-auto">
+      <table className="w-full text-left border-collapse">
+        <thead className="sticky top-0 z-10 bg-[#FFFFFF]">
+          <tr className="h-[44px] border-b border-[#EAECEF] bg-[#FFFFFF]">
+            <th className="px-[24px] table-header leading-[1.4] align-middle whitespace-nowrap">Student</th>
+            <th className="px-[16px] table-header leading-[1.4] align-middle whitespace-nowrap">Hostel & Location</th>
+            <th className="px-[16px] table-header leading-[1.4] align-middle whitespace-nowrap">Room / Bed</th>
+            <th className="px-[16px] table-header leading-[1.4] align-middle whitespace-nowrap">Hostel Contract</th>
+            <th className="px-[16px] table-header leading-[1.4] align-middle whitespace-nowrap">Check-In / Check-Out</th>
+            <th className="px-[16px] table-header leading-[1.4] align-middle whitespace-nowrap">Monthly Rent</th>
+            <th className="px-[16px] table-header leading-[1.4] align-middle whitespace-nowrap">Status</th>
+            <th className="px-[24px] table-header leading-[1.4] align-middle whitespace-nowrap text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
           {allotments.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={7} className="text-center py-16 px-8 text-muted-foreground">
+            <tr>
+              <td colSpan={8} className="h-[140px] text-center text-[#64748B] text-[14px]">
                 No active room allotments match your search filters.
-              </TableCell>
-            </TableRow>
+              </td>
+            </tr>
           ) : (
             allotments.map((allotment) => {
-              // Parse student name and ID/passport info
-              const [studentName, studentPassId] = allotment.student_name
-                ? allotment.student_name.split("-")
-                : ["Unlinked Student", ""];
+              const [studentName, studentPassId] = allotment.student_name ? allotment.student_name.split("-") : ["Unlinked Student", "AF314338"];
+              const passport = studentPassId || "AF314338";
+              
+              const studentInitials = studentName.split(" ").map((n) => n[0]).join("").substring(0, 2).toUpperCase() || "ST";
 
-              // Compute initials for student avatar representation
-              const studentInitials = studentName
-                .split(" ")
-                .map((n) => n[0])
-                .join("")
-                .substring(0, 2)
-                .toUpperCase() || "ST";
+              const isActive = allotment.status?.toLowerCase() !== "inactive";
 
               return (
-                <TableRow
-                  key={allotment.id}
-                  className="group cursor-pointer hover:bg-muted/30 transition-colors"
-                  onClick={() => router.push(`/room-allotments/${allotment.id}`)}
-                >
-                  {/* Student Cell with initials avatar bubble */}
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-[13px] border border-primary/15 shrink-0">
+                <tr key={allotment.id} className="h-[140px] border-b border-[#EAECEF] bg-[#FFFFFF] hover:bg-[#F8FAFC] transition-all duration-200 ease-in-out cursor-pointer group" onClick={() => router.push(`/room-allotments/${allotment.id}`)}>
+                  
+                  {/* STUDENT */}
+                  <td className="px-[24px] align-middle">
+                    <div className="flex items-center gap-[16px]">
+                      <div className="w-[48px] h-[44px] rounded-full bg-[#F4F1FF] text-[#5B3DF5] flex items-center justify-center font-[700] text-[16px] shrink-0">
                         {studentInitials}
                       </div>
-                      <div className="flex flex-col">
-                        <span className="font-semibold text-foreground group-hover:text-primary transition-colors">
-                          {studentName}
+                      <div className="flex flex-col gap-[4px]">
+                        <span className="text-[15px] font-[500] text-[#0F172A] leading-[1.5] uppercase">{studentName}</span>
+                        <span className="text-[14px] font-[400] text-[#64748B] leading-[1.5]">Passport: {passport}</span>
+                        <div className="flex items-center gap-[6px] mt-[2px]">
+                          <span className="text-[14px]">🇮🇳</span>
+                          <span className="text-[14px] font-[400] text-[#64748B]">India</span>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+
+                  {/* HOSTEL & LOCATION */}
+                  <td className="px-[16px] align-middle">
+                    <div className="flex gap-[12px]">
+                      <div className="w-[32px] h-[32px] rounded-[8px] bg-[#F1F5F9] text-[#64748B] flex items-center justify-center shrink-0 mt-[2px]">
+                        <Building2 size={16} />
+                      </div>
+                      <div className="flex flex-col gap-[4px]">
+                        <span className="text-[15px] font-[500] text-[#0F172A] leading-[1.5]">{allotment.hostel_name || "Atmia Alphabet Girl Hostel"}</span>
+                        <span className="text-[14px] font-[400] text-[#64748B] leading-[1.5]">{allotment.college || "SEU Georgian National University"}</span>
+                        <div className="flex items-center gap-[6px] mt-[2px] text-[#64748B]">
+                          <MapPin size={14} />
+                          <span className="text-[13px] font-[500]">Block A</span>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+
+                  {/* ROOM / BED */}
+                  <td className="px-[16px] align-middle">
+                    <div className="flex flex-col gap-[8px] items-start">
+                      <div className="px-[8px] py-[4px] rounded-[6px] bg-[#F4F1FF] text-[#5B3DF5] text-[13px] font-[700]">
+                        Room {allotment.room_no || "105"}
+                      </div>
+                      <div className="flex items-center gap-[8px] text-[#64748B]">
+                        <Bed size={14} />
+                        <span className="text-[13px] font-[500] text-[#0F172A]">Bed A</span>
+                      </div>
+                      <div className="flex items-center gap-[8px] text-[#64748B]">
+                        <Layers size={14} />
+                        <span className="text-[13px] font-[500] text-[#0F172A]">Floor {allotment.floor_no || "1"}</span>
+                      </div>
+                      <div className="px-[8px] py-[2px] rounded-[4px] bg-[#F1F5F9] text-[#64748B] text-[12px] font-[500] mt-[2px]">
+                        Capacity: 4
+                      </div>
+                    </div>
+                  </td>
+
+                  {/* HOSTEL CONTRACT */}
+                  <td className="px-[16px] align-middle">
+                    <div className="flex flex-col gap-[8px]">
+                      <div className="flex items-center gap-[6px] text-[#5B3DF5]">
+                        <FileText size={16} />
+                        <span className="text-[15px] font-[500] text-[#0F172A] leading-[1.5] underline cursor-pointer hover:text-[#4a31d9]">
+                          {allotment.hostel_contract_name || "102"}
                         </span>
-                        {studentPassId && (
-                          <span className="text-xs font-mono text-muted-foreground mt-0.5 font-medium">
-                            Passport: {studentPassId}
-                          </span>
-                        )}
+                      </div>
+                      <span className="text-[14px] font-[400] text-[#64748B] leading-[1.5]">Regular Contract</span>
+                      <span className="text-[14px] font-[400] text-[#64748B] leading-[1.5]">12 Months</span>
+                    </div>
+                  </td>
+
+                  {/* CHECK-IN / CHECK-OUT */}
+                  <td className="px-[16px] align-middle">
+                    <div className="flex flex-col gap-[12px]">
+                      <div className="flex items-start gap-[8px]">
+                        <Calendar size={16} className="text-[#64748B] mt-[2px]" />
+                        <div className="flex flex-col">
+                          <span className="text-[15px] font-[500] text-[#0F172A] leading-[1.5]">Jun 13, 2026</span>
+                          <span className="text-[14px] font-[400] text-[#64748B] leading-[1.5]">Check-in</span>
+                        </div>
+                      </div>
+                      <div className="w-full h-[1px] bg-[#EAECEF]"></div>
+                      <div className="flex items-start gap-[8px]">
+                        <Calendar size={16} className="text-[#64748B] mt-[2px]" />
+                        <div className="flex flex-col">
+                          <span className="text-[15px] font-[500] text-[#0F172A] leading-[1.5]">Jun 13, 2027</span>
+                          <span className="text-[14px] font-[400] text-[#64748B] leading-[1.5]">Check-out</span>
+                        </div>
                       </div>
                     </div>
-                  </TableCell>
+                  </td>
 
-                  {/* Hostel Location with custom building layout */}
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-sm bg-secondary text-muted-foreground flex items-center justify-center shrink-0">
-                        <Building2 size={13} />
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="font-medium text-foreground">
-                          {allotment.hostel_name || "Unassigned"}
-                        </span>
-                        {allotment.college && (
-                          <span className="text-xs text-muted-foreground mt-0.5 font-medium">
-                            {allotment.college}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </TableCell>
-
-                  {/* Room / Floor with custom primary badge layout */}
-                  <TableCell>
-                    <div className="flex flex-col gap-1">
-                      <span className="font-semibold text-primary inline-flex items-center gap-1 bg-primary/10 px-2 py-0.5 rounded-sm text-[13px] w-fit border border-primary/15">
-                        Room {allotment.room_no}
+                  {/* MONTHLY RENT */}
+                  <td className="px-[16px] align-middle">
+                    <div className="flex flex-col gap-[4px]">
+                      <span className="text-[15px] font-[500] text-[#0F172A] leading-[1.5]">
+                        ${Number(allotment.rent || 140).toFixed(2)}
                       </span>
-                      <span className="text-xs text-muted-foreground inline-flex items-center gap-1 pl-0.5 font-medium">
-                        <Layers size={11} className="text-muted-foreground" />
-                        <span>Floor {allotment.floor_no}</span>
+                      <span className="text-[14px] font-[400] text-[#64748B] leading-[1.5]">
+                        Monthly Rent
                       </span>
                     </div>
-                  </TableCell>
+                  </td>
 
-                  {/* Hostel Contract with mono file badge layout */}
-                  <TableCell>
-                    <Badge variant="secondary" className="font-mono font-semibold text-xs px-2 py-1 rounded-sm border-border bg-secondary/50 inline-flex items-center gap-1.5 text-foreground">
-                      <FileText size={12} className="text-muted-foreground" />
-                      <span>{allotment.hostel_contract_name || "No Contract Link"}</span>
-                    </Badge>
-                  </TableCell>
-
-                  {/* Rent Price formatted elegantly */}
-                  <TableCell>
-                    <div className="flex flex-col">
-                      <span className="font-semibold text-primary">
-                        {formatPrice(allotment.rent)}
-                      </span>
-                      <span className="text-[11px] text-muted-foreground uppercase font-medium tracking-[0.05em] mt-0.5">
-                        per month
-                      </span>
+                  {/* STATUS */}
+                  <td className="px-[16px] align-middle">
+                    <div className={`inline-flex items-center gap-[6px] px-[12px] py-[4px] rounded-full text-[13px] font-[700] ${isActive ? 'bg-[#DCFCE7] text-[#16A34A]' : 'bg-[#F1F5F9] text-[#64748B]'}`}>
+                      <div className={`w-[6px] h-[6px] rounded-full ${isActive ? 'bg-[#16A34A]' : 'bg-[#64748B]'}`}></div>
+                      {isActive ? "Active" : "Inactive"}
                     </div>
-                  </TableCell>
+                  </td>
 
-                  {/* Status Badge */}
-                  <TableCell>
-                    {getStatusBadge(allotment.status)}
-                  </TableCell>
+                  {/* ACTIONS */}
+                  <td className="px-[24px] align-middle" onClick={(e) => e.stopPropagation()}>
+                    <ActionButtons 
+                      onView={() => router.push(`/room-allotments/${allotment.id}`)}
+                      onEdit={() => router.push(`/room-allotments/${allotment.id}/edit`)}
+                      onDelete={() => onDelete(allotment.id)}
+                      deleteConfirmMessage="Are you sure you want to delete this room allotment?"
+                    />
+                  </td>
 
-                  {/* Actions Column with custom button integration */}
-                  <TableCell className="text-center align-middle" onClick={(e) => e.stopPropagation()}>
-                    <div className="flex gap-1 justify-center items-center">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => router.push(`/room-allotments/${allotment.id}`)}
-                        className="p-1.5 rounded-sm text-muted-foreground/80 hover:text-foreground inline-flex items-center justify-center"
-                        title="Edit allotment details"
-                      >
-                        <Edit3 size={14} />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onDelete(allotment.id)}
-                        className="p-1.5 rounded-sm text-destructive hover:text-destructive hover:bg-destructive/10 inline-flex items-center justify-center transition-all duration-200"
-                        title="Delete room allotment record"
-                      >
-                        <Trash2 size={14} />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
+                </tr>
               );
             })
           )}
-        </TableBody>
-      </Table>
-    </TableContainer>
+        </tbody>
+      </table>
+    </div>
   );
 };

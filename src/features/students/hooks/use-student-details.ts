@@ -2,9 +2,9 @@ import { useState, useEffect, useCallback } from "react";
 import { StudentsApi } from "../api";
 import { Student, UpdateStudentPayload } from "../types";
 import { Hostel } from "../../hostels/types";
-import { showSuccess, showError, showLoading, closeLoading } from "@/utils/swal";
+import { showDeleteSuccess, showDeleteError, showLoading, closeLoading, showSuccess, showError } from '@/utils/swal';
 
-export const useStudentDetails = (id: string) => {
+export const useStudentDetails = (id: string, initialEditMode: boolean = false) => {
   const [student, setStudent] = useState<Student | null>(null);
   const [hostels, setHostels] = useState<Hostel[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -12,7 +12,7 @@ export const useStudentDetails = (id: string) => {
   const [error, setError] = useState<string | null>(null);
 
   // In-place inline edit mode state
-  const [isEditMode, setIsEditMode] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(initialEditMode);
   const [formData, setFormData] = useState<UpdateStudentPayload>({});
   const [selectedFiles, setSelectedFiles] = useState<{
     profile_pic?: File | null;

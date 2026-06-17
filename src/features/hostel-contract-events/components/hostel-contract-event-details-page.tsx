@@ -5,10 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { 
   ChevronLeft, Edit3, Trash2, Calendar, FileText, ArrowRight, User, 
-  Layers, ShieldCheck, HelpCircle, RefreshCw, ChevronDown, ChevronUp, Activity
+  Layers, ShieldCheck, HelpCircle, RefreshCw, ChevronDown, ChevronUp, Activity, Home, CheckCircle2, ArrowRightLeft
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DetailFormSkeleton } from "@/components/ui/loading-skeleton";
 import { ErrorState } from "@/components/ui/error-state";
@@ -22,33 +20,21 @@ export const HostelContractEventDetailsPage: React.FC<HostelContractEventDetails
   const router = useRouter();
   const { event, isLoading, error, handleDelete, reload } = useHostelContractEventDetails(id);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isDebugOpen, setIsDebugOpen] = useState(false);
 
   const getStatusBadge = (status?: string | null) => {
-    if (!status) return <Badge variant="secondary">—</Badge>;
+    if (!status) return null;
     const lower = status.toLowerCase();
-    if (lower === "confirmed" || lower === "approved") {
-      return <Badge variant="success">{status}</Badge>;
-    }
-    if (lower === "completed") {
-      return <Badge variant="info">{status}</Badge>;
-    }
-    if (lower === "pending" || lower === "pending review") {
-      return <Badge variant="warning">{status}</Badge>;
-    }
-    if (lower === "cancelled" || lower === "rejected") {
-      return <Badge variant="danger">{status}</Badge>;
-    }
-    return <Badge variant="default">{status}</Badge>;
-  };
-
-  const getActionBadge = (action?: string | null) => {
-    if (!action) return <Badge variant="secondary">—</Badge>;
-    const lower = action.toLowerCase();
-    if (lower === "create") return <Badge variant="default" style={{ backgroundColor: "hsl(var(--primary) / 0.1)", color: "hsl(var(--primary))" }}>Create</Badge>;
-    if (lower === "transfer") return <Badge variant="default" style={{ backgroundColor: "hsl(142.1 76.2% 36.3% / 0.1)", color: "hsl(142.1 76.2% 36.3%)" }}>Transfer</Badge>;
-    if (lower === "cancel") return <Badge variant="danger">Cancel</Badge>;
-    return <Badge variant="secondary">{action}</Badge>;
+    const color = lower === "completed" || lower === "confirmed" ? "#16A34A" : "#D97706";
+    const bg = lower === "completed" || lower === "confirmed" ? "#DCFCE7" : "#FEF3C7";
+    return (
+      <div style={{ 
+        backgroundColor: bg, color: color, padding: "4px 12px", borderRadius: "16px", 
+        fontSize: "12px", fontWeight: "600", display: "inline-flex", alignItems: "center", gap: "6px" 
+      }}>
+        <div style={{ width: "6px", height: "6px", borderRadius: "50%", backgroundColor: color }}></div>
+        {status}
+      </div>
+    );
   };
 
   const getActionTitle = (action?: string | null) => {
@@ -65,22 +51,14 @@ export const HostelContractEventDetailsPage: React.FC<HostelContractEventDetails
   const formatDate = (dateStr?: string | null) => {
     if (!dateStr) return "—";
     const d = new Date(dateStr);
-    return d.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "2-digit",
-    });
+    return d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "2-digit" });
   };
 
   const formatDateTime = (dateTimeStr?: string | null) => {
     if (!dateTimeStr) return "—";
     const d = new Date(dateTimeStr);
     return d.toLocaleString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
+      year: "numeric", month: "short", day: "2-digit", hour: "2-digit", minute: "2-digit",
     });
   };
 
@@ -111,534 +89,258 @@ export const HostelContractEventDetailsPage: React.FC<HostelContractEventDetails
     : ["Unlinked Student", ""];
 
   return (
-    <div className="flex flex-col gap-6 animate-in slide-in-from-bottom-4 duration-500">
-      
-      {/* 1. HERO HEADER REDESIGN */}
-      <div className="flex flex-col gap-2 border-b border-border/50 pb-5">
-        {/* Breadcrumb / Back button */}
-        <div className="flex items-center gap-2">
-          <Link href="/hostel-contract-events" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-            <ChevronLeft size={16} />
-            <span>Contract Events</span>
-          </Link>
-        </div>
-
-        {/* Title and Actions Row */}
-        <div className="flex justify-between items-start gap-6 flex-wrap">
-          <div className="flex flex-col gap-1">
-            <h1 className="text-3xl font-extrabold tracking-tight text-foreground m-0">
-              {getActionTitle(event.action_type)}
-            </h1>
-            <div className="text-[15px] text-muted-foreground m-0 flex items-center gap-2 flex-wrap">
-              <span className="font-semibold text-foreground">{studentName}</span>
-              <span className="text-border">•</span>
-              <span className="font-mono text-[13px] bg-secondary px-1.5 py-0.5 rounded-sm">
-                {event.source_hostel_contract_name || "None"}
-              </span>
-              <span>➔</span>
-              <span className="font-mono text-[13px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-sm font-semibold">
-                {event.target_hostel_contract_name || "None"}
-              </span>
-              <span className="text-border">•</span>
-              <div className="inline-flex">{getStatusBadge(event.event_status)}</div>
-            </div>
-          </div>
-
-          {/* Action buttons */}
-          <div className="flex gap-3 items-center">
-            <Button
-              variant="outline"
-              size="md"
-              onClick={reload}
-              className="p-2 h-10 w-10"
-              title="Reload details"
-            >
-              <RefreshCw size={16} />
-            </Button>
-            <Button
-              variant="primary"
-              size="md"
-              onClick={() => router.push(`/hostel-contract-events/${event.id}/edit`)}
-              className="gap-1.5"
-            >
-              <Edit3 size={16} />
-              <span>Edit Event</span>
-            </Button>
-            <div className="relative">
-              <Button
-                variant="outline"
-                size="md"
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="gap-1"
-              >
-                <span>More Actions</span>
-                <span className="text-[10px]">▼</span>
-              </Button>
-              {isDropdownOpen && (
-                <>
-                  <div 
-                    onClick={() => setIsDropdownOpen(false)} 
-                    className="fixed inset-0 z-40"
-                  />
-                  <div className="absolute right-0 top-full mt-1 bg-card border border-border rounded-md shadow-lg z-50 min-w-[160px] flex flex-col p-1">
-                    <button
-                      onClick={() => {
-                        setIsDropdownOpen(false);
-                        router.push(`/hostel-contract-events/new?duplicate=${event.id}`);
-                      }}
-                      className="px-4 py-2 text-left bg-transparent border-none text-sm cursor-pointer text-foreground w-full hover:bg-accent rounded-sm"
-                    >
-                      Duplicate Event
-                    </button>
-                    <button
-                      onClick={() => {
-                        setIsDropdownOpen(false);
-                        window.print();
-                      }}
-                      className="px-4 py-2 text-left bg-transparent border-none text-sm cursor-pointer text-foreground w-full hover:bg-accent rounded-sm"
-                    >
-                      Print/Export
-                    </button>
-                    <button
-                      onClick={() => {
-                        setIsDropdownOpen(false);
-                        onDeleteConfirm();
-                      }}
-                      className="px-4 py-2 text-left bg-transparent border-none text-sm cursor-pointer text-destructive w-full hover:bg-accent rounded-sm"
-                    >
-                      Delete Event
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Secondary Metadata Row */}
-        <div className="flex gap-5 items-center flex-wrap text-[13px] text-muted-foreground mt-2">
-          <div className="flex items-center gap-1.5">
-            <span className="font-semibold">Event ID:</span>
-            <span className="font-mono text-foreground font-medium">{event.id.toUpperCase()}</span>
-          </div>
-          <div className="w-[1px] h-3 bg-border" />
-          <div className="flex items-center gap-1.5">
-            <span className="font-semibold">Type:</span>
-            <Badge variant="secondary" className="uppercase text-[11px] font-bold px-1.5">{event.action_type}</Badge>
-          </div>
-          <div className="w-[1px] h-3 bg-border" />
-          <div className="flex items-center gap-1.5">
-            <span className="font-semibold">Effective Date:</span>
-            <span className="text-foreground font-semibold">{formatDate(event.effective_date)}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* 2. EVENT OVERVIEW SECTION (KPI rows) */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-        {/* KPI 1: Event Type */}
-        <div className="p-4 bg-card border border-border/80 rounded-lg shadow-sm flex flex-col gap-1">
-          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Event Type</span>
-          <span className="text-xl font-bold text-foreground">{event.action_type}</span>
-        </div>
-
-        {/* KPI 2: Status */}
-        <div className="p-4 bg-card border border-border/80 rounded-lg shadow-sm flex flex-col gap-1">
-          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</span>
-          <div className="inline-flex mt-0.5">
-            {getStatusBadge(event.event_status)}
-          </div>
-        </div>
-
-        {/* KPI 3: Effective Date */}
-        <div className="p-4 bg-card border border-border/80 rounded-lg shadow-sm flex flex-col gap-1">
-          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Effective Date</span>
-          <span className="text-lg font-bold text-primary">{formatDate(event.effective_date)}</span>
-        </div>
-
-        {/* KPI 4: Created Date */}
-        <div className="p-4 bg-card border border-border/80 rounded-lg shadow-sm flex flex-col gap-1">
-          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Created On</span>
-          <span className="text-lg font-bold text-foreground">{formatDate(event.created_at)}</span>
-        </div>
-
-        {/* KPI 5: Settlement Linked */}
-        <div className="p-4 bg-card border border-border/80 rounded-lg shadow-sm flex flex-col gap-1">
-          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Settlement Linked</span>
-          <div className="inline-flex mt-0.5">
-            {event.settlement_rap ? (
-              <Badge variant="success">Yes</Badge>
-            ) : (
-              <Badge variant="secondary">No</Badge>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* 3. TRANSITION TIMELINE (MAIN FEATURE - Full Width) */}
-      <Card className="border border-border/80 shadow-sm">
-        <CardHeader className="border-b border-border/50 py-5 px-6">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Activity size={18} className="text-primary" />
-            <span>Transitional Lifecycle Flow</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 relative">
-            
-            {/* Timeline 1: Contract Lifecycle */}
-            <div className="flex flex-col gap-6">
-              <div className="flex items-center gap-2 border-b border-border/50 pb-2">
-                <span className="text-[13px] font-bold text-muted-foreground uppercase tracking-wider">
-                  Contract Lifecycle
-                </span>
-                <Badge variant="secondary" className="text-[11px]">Audit Track 01</Badge>
-              </div>
-
-              {/* Vertical Step Line Container */}
-              <div className="flex flex-col gap-8 relative">
-                
-                {/* Visual Line */}
-                <div className="absolute left-[15px] top-6 bottom-6 w-0.5 bg-border/60 z-0" />
-
-                {/* Step 1: Source Contract */}
-                <div className="flex gap-4 z-10 relative">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${event.source_hostel_contract_id ? "bg-secondary border border-border" : "bg-secondary/40 border border-dashed border-border"}`}>
-                    <FileText size={16} className="text-muted-foreground" />
-                  </div>
-                  <div className="flex flex-col gap-0.5">
-                    <span className="text-xs font-semibold text-muted-foreground uppercase">Source Contract (Pre-Event)</span>
-                    {event.source_hostel_contract_id ? (
-                      <Link href={`/hostel-contracts/${event.source_hostel_contract_id}`} className="font-bold text-[15px] text-primary hover:underline">
-                        {event.source_hostel_contract_name || "View Contract"}
-                      </Link>
-                    ) : (
-                      <span className="text-[15px] font-semibold text-muted-foreground">None (New Registration)</span>
-                    )}
-                    {event.contract_type_before && (
-                      <span className="text-xs text-muted-foreground">Type: {event.contract_type_before}</span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Step 2: Action node */}
-                <div className="flex gap-4 z-10 relative">
-                  <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
-                    <RefreshCw size={16} className="text-primary" />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <span className="text-xs font-semibold text-muted-foreground uppercase">Transaction Processed</span>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="default" className="bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 font-semibold">
-                        {event.action_type}
-                      </Badge>
-                      <span className="text-xs text-muted-foreground">by {event.triggered_by || "system"}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Step 3: Target Contract */}
-                <div className="flex gap-4 z-10 relative">
-                  <div className="w-8 h-8 rounded-full bg-primary/5 border border-primary/20 flex items-center justify-center shrink-0">
-                    <ShieldCheck size={16} className="text-primary" />
-                  </div>
-                  <div className="flex flex-col gap-0.5">
-                    <span className="text-xs font-semibold text-primary uppercase">Target Contract (Post-Event)</span>
-                    {event.target_hostel_contract_id ? (
-                      <Link href={`/hostel-contracts/${event.target_hostel_contract_id}`} className="font-bold text-[15px] text-primary hover:underline">
-                        {event.target_hostel_contract_name || "View Contract"}
-                      </Link>
-                    ) : (
-                      <span className="text-[15px] font-semibold text-muted-foreground">None (Terminated)</span>
-                    )}
-                    {event.contract_type_after && (
-                      <span className="text-xs text-primary">Type: {event.contract_type_after}</span>
-                    )}
-                  </div>
-                </div>
-
-              </div>
-            </div>
-
-            {/* Timeline 2: Room Lifecycle */}
-            <div className="flex flex-col gap-6">
-              <div className="flex items-center gap-2 border-b border-border/50 pb-2">
-                <span className="text-[13px] font-bold text-muted-foreground uppercase tracking-wider">
-                  Room Lifecycle
-                </span>
-                <Badge variant="secondary" className="text-[11px]">Audit Track 02</Badge>
-              </div>
-
-              {/* Vertical Step Line Container */}
-              <div className="flex flex-col gap-8 relative">
-                
-                {/* Visual Line */}
-                <div className="absolute left-[15px] top-6 bottom-6 w-0.5 bg-border/60 z-0" />
-
-                {/* Step 1: Source Room */}
-                <div className="flex gap-4 z-10 relative">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${event.source_room_allotment_id ? "bg-secondary border border-border" : "bg-secondary/40 border border-dashed border-border"}`}>
-                    <Layers size={16} className="text-muted-foreground" />
-                  </div>
-                  <div className="flex flex-col gap-0.5">
-                    <span className="text-xs font-semibold text-muted-foreground uppercase">Source Room Allotment</span>
-                    {event.source_room_allotment_id ? (
-                      <Link href={`/room-allotments/${event.source_room_allotment_id}`} className="font-bold text-[15px] text-primary hover:underline">
-                        {event.source_room_allotment_name || "View Allotment"}
-                      </Link>
-                    ) : (
-                      <span className="text-[15px] font-semibold text-muted-foreground">Unassigned</span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Step 2: Allotment Action */}
-                <div className="flex gap-4 z-10 relative">
-                  <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
-                    <RefreshCw size={16} className="text-primary" />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <span className="text-xs font-semibold text-muted-foreground uppercase">Allotment Transition</span>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="default" className="bg-primary/5 text-primary border border-primary/10 hover:bg-primary/10 font-semibold">
-                        ALLOT UPDATE
-                      </Badge>
-                      <span className="text-xs text-muted-foreground">Effective: {formatDate(event.effective_date)}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Step 3: Target Room */}
-                <div className="flex gap-4 z-10 relative">
-                  <div className="w-8 h-8 rounded-full bg-primary/5 border border-primary/20 flex items-center justify-center shrink-0">
-                    <Layers size={16} className="text-primary" />
-                  </div>
-                  <div className="flex flex-col gap-0.5">
-                    <span className="text-xs font-semibold text-primary uppercase">Target Room Allotment</span>
-                    {event.target_room_allotment_id ? (
-                      <Link href={`/room-allotments/${event.target_room_allotment_id}`} className="font-bold text-[15px] text-primary hover:underline">
-                        {event.target_room_allotment_name || "View Allotment"}
-                      </Link>
-                    ) : (
-                      <span className="text-[15px] font-semibold text-muted-foreground">Unassigned</span>
-                    )}
-                  </div>
-                </div>
-
-              </div>
-            </div>
-
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* 4. STUDENT CONTEXT CARD & 5. AUDIT TRAIL SECTION (2 Column Grid) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div style={{ backgroundColor: "#F7F8FC", minHeight: "100vh", fontFamily: "'Inter', sans-serif" }}>
+      <div style={{ width: "100%", padding: "24px", boxSizing: "border-box" }}>
         
-        {/* Left Column: Student Context Card */}
-        <Card className="border border-border/80 shadow-sm">
-          <CardHeader className="border-b border-border/50 py-5 px-6">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <User size={18} className="text-primary" />
-              <span>Student Profile Context</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-6 flex flex-col gap-5">
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xl border border-primary/20 shrink-0">
-                {studentName.split(" ").map((n) => n[0]).join("").substring(0, 2).toUpperCase() || "ST"}
-              </div>
-              <div className="flex flex-col">
-                <Link href={`/students/${event.student_id}`} className="font-extrabold text-[17px] text-primary hover:underline">
-                  {studentName}
-                </Link>
-                {studentPassId && (
-                  <span className="text-[13px] text-muted-foreground font-mono">
-                    Passport/ID: {studentPassId}
-                  </span>
+        {/* HEADER AREA */}
+        <div style={{ marginBottom: "16px" }}>
+          <Link href="/hostel-contract-events" style={{ color: "#64748B", fontSize: "14px", fontWeight: "500", display: "inline-flex", alignItems: "center", gap: "6px", textDecoration: "none", marginBottom: "12px" }}>
+            <ChevronLeft size={16} /> Back to Contract Events
+          </Link>
+          
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+              <h1 style={{ fontSize: "40px", fontWeight: "800", color: "#0F172A", margin: "0", letterSpacing: "-1px" }}>
+                {getActionTitle(event.action_type)}
+              </h1>
+              {getStatusBadge(event.event_status)}
+            </div>
+            
+            <div style={{ display: "flex", gap: "10px" }}>
+              <button onClick={reload} style={{ height: "42px", borderRadius: "8px", border: "1px solid #E5E7EB", backgroundColor: "#FFFFFF", padding: "0 16px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <RefreshCw size={16} color="#64748B" />
+              </button>
+              <button onClick={() => router.push(`/hostel-contract-events/${event.id}/edit`)} style={{ height: "42px", borderRadius: "8px", border: "none", backgroundColor: "#5B3DF5", color: "#FFFFFF", fontWeight: "600", fontSize: "14px", display: "flex", alignItems: "center", gap: "8px", padding: "0 20px", cursor: "pointer" }}>
+                <Edit3 size={16} /> Edit Event
+              </button>
+              <div style={{ position: "relative" }}>
+                <button onClick={() => setIsDropdownOpen(!isDropdownOpen)} style={{ height: "42px", borderRadius: "8px", border: "1px solid #E5E7EB", backgroundColor: "#FFFFFF", color: "#0F172A", fontWeight: "600", fontSize: "14px", display: "flex", alignItems: "center", gap: "8px", padding: "0 16px", cursor: "pointer" }}>
+                  More Actions <span style={{ fontSize: "10px" }}>▼</span>
+                </button>
+                {isDropdownOpen && (
+                  <div style={{ position: "absolute", top: "46px", right: "0", backgroundColor: "#FFF", border: "1px solid #E5E7EB", borderRadius: "8px", boxShadow: "0 4px 12px rgba(0,0,0,0.1)", zIndex: 50, minWidth: "160px", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+                    <div style={{ padding: "10px 16px", cursor: "pointer", fontSize: "14px", color: "#0F172A" }} onClick={() => { setIsDropdownOpen(false); router.push(`/hostel-contract-events/new?duplicate=${event.id}`); }}>Duplicate Event</div>
+                    <div style={{ padding: "10px 16px", cursor: "pointer", fontSize: "14px", color: "#0F172A" }} onClick={() => { setIsDropdownOpen(false); window.print(); }}>Print/Export</div>
+                    <div style={{ padding: "10px 16px", cursor: "pointer", fontSize: "14px", color: "#EF4444", borderTop: "1px solid #F1F5F9" }} onClick={() => { setIsDropdownOpen(false); onDeleteConfirm(); }}>Delete Event</div>
+                  </div>
                 )}
               </div>
             </div>
+          </div>
 
-            <div className="flex flex-col gap-2.5 border-t border-border/40 pt-4">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Resident Status</span>
-                <span className="font-semibold text-success">Active Resident</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Current Room Allotment</span>
-                <span className="font-semibold text-foreground">{event.target_room_allotment_name || "Unassigned"}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Contract Count</span>
-                <span className="font-semibold text-foreground">2 Contracts</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Student ID Reference</span>
-                <span className="font-mono text-xs text-muted-foreground">{event.student_id}</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          <div style={{ display: "flex", gap: "24px", alignItems: "center", marginTop: "16px", padding: "12px 0", borderTop: "1px solid #E5E7EB", borderBottom: "1px solid #E5E7EB" }}>
+            <div style={{ fontSize: "13px", color: "#64748B" }}>Event ID <span style={{ color: "#0F172A", fontWeight: "600", marginLeft: "6px", fontFamily: "monospace" }}>{event.id.toUpperCase()}</span></div>
+            <div style={{ width: "1px", height: "16px", backgroundColor: "#E5E7EB" }}></div>
+            <div style={{ fontSize: "13px", color: "#64748B" }}>Type <span style={{ color: "#5B3DF5", backgroundColor: "#F3F0FF", padding: "2px 8px", borderRadius: "12px", fontWeight: "700", marginLeft: "6px", fontSize: "11px" }}>{event.action_type.toUpperCase()}</span></div>
+            <div style={{ width: "1px", height: "16px", backgroundColor: "#E5E7EB" }}></div>
+            <div style={{ fontSize: "13px", color: "#64748B", display: "flex", alignItems: "center", gap: "6px" }}>Effective Date <Calendar size={14}/> <span style={{ color: "#0F172A", fontWeight: "600" }}>{formatDate(event.effective_date)}</span></div>
+            <div style={{ width: "1px", height: "16px", backgroundColor: "#E5E7EB" }}></div>
+            <div style={{ fontSize: "13px", color: "#64748B", display: "flex", alignItems: "center", gap: "6px" }}>Created On <Calendar size={14}/> <span style={{ color: "#0F172A", fontWeight: "600" }}>{formatDate(event.created_at)}</span></div>
+          </div>
+        </div>
 
-        {/* Right Column: Audit Trail Grid */}
-        <Card className="border border-border/80 shadow-sm">
-          <CardHeader className="border-b border-border/50 py-5 px-6">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Layers size={18} className="text-primary" />
-              <span>Audit Parameters</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-6">
-            <div className="grid grid-cols-2 gap-5">
+        {/* TOP GRID (58% / 42%) */}
+        <div style={{ display: "grid", gridTemplateColumns: "58% 42%", gap: "16px", marginBottom: "16px" }}>
+          
+          {/* Transfer Timeline */}
+          <div style={{ backgroundColor: "#FFFFFF", borderRadius: "16px", border: "1px solid #E5E7EB", padding: "20px" }}>
+            <h2 style={{ fontSize: "24px", fontWeight: "700", color: "#0F172A", margin: "0 0 20px 0" }}>Transfer Timeline</h2>
+            
+            <div style={{ display: "flex", flexDirection: "column", position: "relative", paddingLeft: "16px" }}>
+              <div style={{ position: "absolute", left: "34px", top: "16px", bottom: "16px", width: "2px", backgroundColor: "#F1F5F9", zIndex: 0 }}></div>
               
-              <div>
-                <span className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider">Created By</span>
-                <span className="text-sm font-semibold text-foreground">{event.triggered_by || "system"}</span>
-              </div>
-
-              <div>
-                <span className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider">Effective Date</span>
-                <span className="text-sm font-semibold text-primary">{formatDate(event.effective_date)}</span>
-              </div>
-
-              <div className="col-span-2 border-t border-border/40 pt-4">
-                <span className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider">Created At Timestamp</span>
-                <span className="text-sm font-medium text-foreground">{formatDateTime(event.created_at)}</span>
-              </div>
-
-              <div className="col-span-2 border-t border-border/40 pt-4">
-                <span className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider">Last Updated Timestamp</span>
-                <span className="text-sm font-medium text-foreground">{formatDateTime(event.updated_at)}</span>
-              </div>
-
-              <div className="col-span-2 border-t border-border/40 pt-4">
-                <span className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider">Event Source</span>
-                <span className="text-sm font-semibold text-success">System Audit Ledger</span>
-              </div>
-
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* 6. SETTLEMENT REFERENCE REDESIGN (Linked Financial Records) */}
-      <Card className="border border-border/80 shadow-sm">
-        <CardHeader className="border-b border-border/50 py-5 px-6">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <ShieldCheck size={18} className="text-primary" />
-            <span>Linked Financial Records</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6">
-          {event.settlement_rap ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-center p-5 bg-card border border-border rounded-lg shadow-sm transition-colors hover:border-primary">
-              
-              {/* Left Column: Reference & Clickable Link */}
-              <div className="flex flex-col gap-1">
-                <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-                  Room Allotment Payment (RAP) Reference
-                </span>
-                <Link href={`/room-allotment-payments/${event.settlement_rap}`} className="font-bold text-[15px] text-primary hover:underline">
-                  RAP-{event.settlement_rap.substring(0, 8).toUpperCase()}
-                </Link>
-                <span className="text-xs text-muted-foreground font-mono">
-                  ID: {event.settlement_rap}
-                </span>
-              </div>
-
-              {/* Middle Column: Details Description */}
-              <div className="flex flex-col gap-0.5">
-                <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-                  Record Description
-                </span>
-                <span className="text-sm font-medium text-foreground">
-                  Allotment Rent & Security Deposit Settlement
-                </span>
-              </div>
-
-              {/* Amount Column */}
-              <div className="flex flex-col gap-0.5">
-                <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-                  Settlement Amount
-                </span>
-                <span className="text-lg font-bold text-foreground">
-                  $1,250.00
-                </span>
-              </div>
-
-              {/* Status Column */}
-              <div className="flex flex-col gap-1">
-                <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-                  Status
-                </span>
+              <div style={{ display: "flex", gap: "16px", position: "relative", zIndex: 1, marginBottom: "20px" }}>
+                <div style={{ width: "36px", height: "36px", borderRadius: "50%", backgroundColor: "#F3F0FF", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 0 0 4px #FFFFFF" }}>
+                  <FileText size={16} color="#5B3DF5" />
+                </div>
                 <div>
-                  <Badge variant="success">Paid</Badge>
+                  <div style={{ fontSize: "14px", fontWeight: "700", color: "#0F172A", marginBottom: "2px" }}>Source Contract</div>
+                  <div style={{ fontSize: "13px", color: "#64748B" }}>{event.source_hostel_contract_name ? `Contract ${event.source_hostel_contract_name}` : "None"}</div>
                 </div>
               </div>
 
-            </div>
-          ) : (
-            <div className="flex items-center gap-3 p-4 bg-secondary/15 border border-dashed border-border rounded-md text-muted-foreground">
-              <HelpCircle size={20} className="shrink-0" />
-              <span className="text-sm">No linked settlement Room Allotment Payment (RAP) reference found for this event.</span>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+              <div style={{ display: "flex", gap: "16px", position: "relative", zIndex: 1, marginBottom: "20px" }}>
+                <div style={{ width: "36px", height: "36px", borderRadius: "50%", backgroundColor: "#F3F0FF", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 0 0 4px #FFFFFF" }}>
+                  <Home size={16} color="#5B3DF5" />
+                </div>
+                <div>
+                  <div style={{ fontSize: "14px", fontWeight: "700", color: "#0F172A", marginBottom: "2px" }}>Source Room Allotment</div>
+                  <div style={{ fontSize: "13px", color: "#64748B" }}>{event.source_room_allotment_name || "None"}</div>
+                </div>
+              </div>
 
-      {/* 7. ADDITIONAL METADATA (Collapsible Debug Panel) */}
-      <Card className="border border-border/80 shadow-sm">
-        <button
-          type="button"
-          onClick={() => setIsDebugOpen(!isDebugOpen)}
-          className="w-full flex justify-between items-center py-5 px-6 bg-transparent border-none cursor-pointer text-left"
-        >
-          <div className="flex flex-col gap-0.5">
-            <span className="text-[15px] font-semibold text-card-foreground">
-              Additional Metadata
-            </span>
-            <span className="text-xs text-muted-foreground">
-              Raw ledger UUIDs and diagnostic records
-            </span>
-          </div>
-          <div className="flex items-center text-muted-foreground">
-            {isDebugOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-          </div>
-        </button>
-        
-        {isDebugOpen && (
-          <CardContent className="px-6 pb-6 pt-5 border-t border-dashed border-border/50">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 font-mono text-[13px]">
-              <div>
-                <span className="block text-muted-foreground font-semibold">Raw Event ID</span>
-                <span className="text-foreground">{event.id}</span>
+              <div style={{ display: "flex", gap: "16px", position: "relative", zIndex: 1, marginBottom: "20px" }}>
+                <div style={{ width: "36px", height: "36px", borderRadius: "50%", backgroundColor: "#DCFCE7", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 0 0 4px #FFFFFF" }}>
+                  <ArrowRightLeft size={16} color="#16A34A" />
+                </div>
+                <div style={{ flex: 1, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div>
+                    <div style={{ fontSize: "14px", fontWeight: "700", color: "#0F172A", marginBottom: "2px" }}>Transfer Processed</div>
+                    <div style={{ fontSize: "13px", color: "#64748B" }}>Transfer completed by {event.triggered_by || "System Settle"}</div>
+                  </div>
+                  <div style={{ textAlign: "right" }}>
+                    {getStatusBadge(event.event_status)}
+                    <div style={{ fontSize: "12px", color: "#64748B", marginTop: "4px" }}>{formatDate(event.effective_date)}</div>
+                  </div>
+                </div>
               </div>
-              <div>
-                <span className="block text-muted-foreground font-semibold">Raw Student ID</span>
-                <span className="text-foreground">{event.student_id}</span>
+
+              <div style={{ display: "flex", gap: "16px", position: "relative", zIndex: 1, marginBottom: "20px" }}>
+                <div style={{ width: "36px", height: "36px", borderRadius: "50%", backgroundColor: "#F3F0FF", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 0 0 4px #FFFFFF" }}>
+                  <FileText size={16} color="#5B3DF5" />
+                </div>
+                <div>
+                  <div style={{ fontSize: "14px", fontWeight: "700", color: "#0F172A", marginBottom: "2px" }}>Target Contract</div>
+                  <div style={{ fontSize: "13px", color: "#64748B" }}>{event.target_hostel_contract_name ? `Contract ${event.target_hostel_contract_name}` : "None"}</div>
+                </div>
               </div>
-              <div>
-                <span className="block text-muted-foreground font-semibold">Source Contract ID</span>
-                <span className="text-foreground">{event.source_hostel_contract_id || "null"}</span>
-              </div>
-              <div>
-                <span className="block text-muted-foreground font-semibold">Target Contract ID</span>
-                <span className="text-foreground">{event.target_hostel_contract_id || "null"}</span>
-              </div>
-              <div>
-                <span className="block text-muted-foreground font-semibold">Source Allotment ID</span>
-                <span className="text-foreground">{event.source_room_allotment_id || "null"}</span>
-              </div>
-              <div>
-                <span className="block text-muted-foreground font-semibold">Target Allotment ID</span>
-                <span className="text-foreground">{event.target_room_allotment_id || "null"}</span>
+
+              <div style={{ display: "flex", gap: "16px", position: "relative", zIndex: 1 }}>
+                <div style={{ width: "36px", height: "36px", borderRadius: "50%", backgroundColor: "#F3F0FF", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 0 0 4px #FFFFFF" }}>
+                  <Home size={16} color="#5B3DF5" />
+                </div>
+                <div>
+                  <div style={{ fontSize: "14px", fontWeight: "700", color: "#0F172A", marginBottom: "2px" }}>Target Room Allotment</div>
+                  <div style={{ fontSize: "13px", color: "#64748B" }}>{event.target_room_allotment_name || "None"}</div>
+                </div>
               </div>
             </div>
-          </CardContent>
-        )}
-      </Card>
 
+          </div>
+
+          {/* Event Summary */}
+          <div style={{ backgroundColor: "#FFFFFF", borderRadius: "16px", border: "1px solid #E5E7EB", padding: "20px" }}>
+            <h2 style={{ fontSize: "24px", fontWeight: "700", color: "#0F172A", margin: "0 0 20px 0" }}>Event Summary</h2>
+            
+            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", paddingBottom: "16px", borderBottom: "1px solid #F1F5F9" }}>
+                <span style={{ fontSize: "13px", color: "#0F172A", fontWeight: "500" }}>Status</span>
+                {getStatusBadge(event.event_status)}
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", paddingBottom: "16px", borderBottom: "1px solid #F1F5F9" }}>
+                <span style={{ fontSize: "13px", color: "#0F172A", fontWeight: "500" }}>Event Type</span>
+                <span style={{ fontSize: "13px", color: "#0F172A" }}>{event.action_type}</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", paddingBottom: "16px", borderBottom: "1px solid #F1F5F9" }}>
+                <span style={{ fontSize: "13px", color: "#0F172A", fontWeight: "500" }}>Settlement Linked</span>
+                <span style={{ fontSize: "13px", color: event.settlement_rap ? "#16A34A" : "#64748B", fontWeight: "600" }}>
+                  {event.settlement_rap ? "Yes" : "No"}
+                </span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", paddingBottom: "16px", borderBottom: "1px solid #F1F5F9" }}>
+                <span style={{ fontSize: "13px", color: "#0F172A", fontWeight: "500" }}>Action Performed By</span>
+                <span style={{ fontSize: "13px", color: "#0F172A" }}>{event.triggered_by || "System Settle"}</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", paddingBottom: "16px", borderBottom: "1px solid #F1F5F9" }}>
+                <span style={{ fontSize: "13px", color: "#0F172A", fontWeight: "500" }}>Audit Source</span>
+                <span style={{ fontSize: "13px", color: "#0F172A" }}>System Audit Ledger</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* BOTTOM GRID (repeat 3) */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px", alignItems: "stretch" }}>
+          
+          {/* Student Information */}
+          <div style={{ backgroundColor: "#FFFFFF", borderRadius: "16px", border: "1px solid #E5E7EB", padding: "20px", display: "flex", flexDirection: "column" }}>
+            <h3 style={{ fontSize: "15px", fontWeight: "700", color: "#0F172A", margin: "0 0 16px 0", display: "flex", alignItems: "center", gap: "8px" }}>
+              <User size={16} color="#64748B"/> Student Information
+            </h3>
+            
+            <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "24px" }}>
+              <div style={{ width: "56px", height: "56px", borderRadius: "50%", backgroundColor: "#F3F0FF", color: "#5B3DF5", fontSize: "18px", fontWeight: "700", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                {studentName.split(" ").map(n => n[0]).join("").substring(0,2).toUpperCase() || "ST"}
+              </div>
+              <div>
+                <div style={{ fontSize: "18px", fontWeight: "700", color: "#0F172A", marginBottom: "4px" }}>{studentName}</div>
+                <div style={{ fontSize: "13px", color: "#64748B" }}>Passport/ID: {studentPassId || "SR"}</div>
+              </div>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "12px", marginTop: "auto" }}>
+              <div>
+                <div style={{ fontSize: "12px", color: "#64748B", marginBottom: "4px" }}>Resident Status</div>
+                <div style={{ fontSize: "13px", fontWeight: "600", color: "#16A34A" }}>Active Resident</div>
+              </div>
+              <div>
+                <div style={{ fontSize: "12px", color: "#64748B", marginBottom: "4px" }}>Current Room</div>
+                <div style={{ fontSize: "13px", fontWeight: "600", color: "#0F172A" }}>{event.target_room_allotment_name || "None"}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: "12px", color: "#64748B", marginBottom: "4px" }}>Student ID Ref</div>
+                <div style={{ fontSize: "12px", color: "#0F172A", fontFamily: "monospace" }}>{event.student_id.substring(0, 13)}...</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Settlement Summary */}
+          <div style={{ backgroundColor: "#FFFFFF", borderRadius: "16px", border: "1px solid #E5E7EB", padding: "20px", display: "flex", flexDirection: "column" }}>
+            <h3 style={{ fontSize: "15px", fontWeight: "700", color: "#0F172A", margin: "0 0 16px 0", display: "flex", alignItems: "center", gap: "8px" }}>
+              <FileText size={16} color="#64748B"/> Settlement Summary
+            </h3>
+            
+            {event.settlement_rap ? (
+              <>
+                <div style={{ marginBottom: "20px" }}>
+                  <div style={{ fontSize: "12px", color: "#64748B", marginBottom: "4px" }}>Linked Financial Record</div>
+                  <Link href={`/room-allotment-payments/${event.settlement_rap}`} style={{ fontSize: "18px", fontWeight: "700", color: "#5B3DF5", textDecoration: "none", marginBottom: "4px", display: "block" }}>
+                    RAP-{event.settlement_rap.substring(0,8).toUpperCase()}
+                  </Link>
+                  <div style={{ fontSize: "13px", color: "#64748B" }}>Allotment Rent & Security Deposit Settlement</div>
+                </div>
+
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "auto" }}>
+                  <div>
+                    <div style={{ fontSize: "12px", color: "#64748B", marginBottom: "4px" }}>Settlement Amount</div>
+                    <div style={{ fontSize: "20px", fontWeight: "700", color: "#0F172A" }}>$1,250.00</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: "12px", color: "#64748B", marginBottom: "4px", textAlign: "right" }}>Status</div>
+                    <div style={{ backgroundColor: "#DCFCE7", color: "#16A34A", padding: "4px 12px", borderRadius: "16px", fontSize: "12px", fontWeight: "600", display: "inline-block" }}>Paid</div>
+                  </div>
+                </div>
+                
+                <button onClick={() => router.push(`/room-allotment-payments/${event.settlement_rap}`)} style={{ marginTop: "16px", width: "120px", height: "36px", borderRadius: "8px", border: "1px solid #5B3DF5", backgroundColor: "#FFFFFF", color: "#5B3DF5", fontSize: "13px", fontWeight: "600", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", cursor: "pointer" }}>
+                  View Payment <ArrowRight size={14}/>
+                </button>
+              </>
+            ) : (
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#64748B", fontSize: "14px", marginTop: "20px" }}>
+                <HelpCircle size={18} /> No settlement linked to this event.
+              </div>
+            )}
+          </div>
+
+          {/* System Information */}
+          <div style={{ backgroundColor: "#FFFFFF", borderRadius: "16px", border: "1px solid #E5E7EB", padding: "20px", display: "flex", flexDirection: "column" }}>
+            <h3 style={{ fontSize: "15px", fontWeight: "700", color: "#0F172A", margin: "0 0 16px 0", display: "flex", alignItems: "center", gap: "8px" }}>
+              <ShieldCheck size={16} color="#64748B"/> System Information
+            </h3>
+            
+            <div style={{ display: "flex", flexDirection: "column", gap: "16px", flex: 1, justifyContent: "center" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", paddingBottom: "16px", borderBottom: "1px solid #F1F5F9" }}>
+                <span style={{ fontSize: "13px", color: "#64748B" }}>Created By</span>
+                <span style={{ fontSize: "13px", color: "#0F172A", fontWeight: "500" }}>{event.triggered_by || "System Settle"}</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", paddingBottom: "16px", borderBottom: "1px solid #F1F5F9" }}>
+                <span style={{ fontSize: "13px", color: "#64748B" }}>Created At</span>
+                <span style={{ fontSize: "13px", color: "#0F172A", fontWeight: "500" }}>{formatDateTime(event.created_at)}</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", paddingBottom: "16px", borderBottom: "1px solid #F1F5F9" }}>
+                <span style={{ fontSize: "13px", color: "#64748B" }}>Last Updated</span>
+                <span style={{ fontSize: "13px", color: "#0F172A", fontWeight: "500" }}>{formatDateTime(event.updated_at)}</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", paddingBottom: "8px" }}>
+                <span style={{ fontSize: "13px", color: "#64748B" }}>Source System</span>
+                <span style={{ fontSize: "13px", color: "#0F172A", fontWeight: "500" }}>System Audit Ledger</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
     </div>
   );
 };

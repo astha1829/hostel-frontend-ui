@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { History, Plus, Trash2, Calendar } from "lucide-react";
+import { showDeleteConfirm, showDeleteSuccess, showDeleteError, showLoading, closeLoading } from "@/utils/swal";
 import { Card, CardContent } from "@/components/ui/card";
 import { TableContainer, Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -49,14 +50,17 @@ export const HostelHistoryTab: React.FC<HostelHistoryTabProps> = ({ roomAllotmen
   }, [roomAllotmentId, loadHistory]);
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm("Are you sure you want to delete this stay history record?")) {
-      return;
-    }
+    const result = await showDeleteConfirm("Are you sure you want to delete this stay history record?");
+    if (!result.isConfirmed) return;
     try {
+      showLoading();
       await HostelHistoryApi.deleteHostelHistory(id);
+      closeLoading();
+      await showDeleteSuccess();
       loadHistory();
     } catch (err: any) {
-      alert(err.message || "Failed to delete stay history record.");
+      closeLoading();
+      await showDeleteError();
     }
   };
 

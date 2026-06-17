@@ -8,7 +8,7 @@ import {
   RoomAllotmentPaymentSummary,
   HostelContractEventSummary,
 } from "../types";
-import { showSuccess, showError, showLoading, closeLoading } from "@/utils/swal";
+import { showDeleteSuccess, showDeleteError, showLoading, closeLoading, showSuccess, showError } from '@/utils/swal';
 
 const initialFormState: CreateRentPaymentPayload = {
   student_id: "",
@@ -51,6 +51,8 @@ export function useRentPaymentForm({ id, onSuccess, onCancel }: UseRentPaymentFo
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [apiError, setApiError] = useState<string | null>(null);
 
+  const [originalPayment, setOriginalPayment] = useState<any>(null);
+
   // Fetch initial general metadata (students list)
   useEffect(() => {
     const loadMetadata = async () => {
@@ -76,6 +78,7 @@ export function useRentPaymentForm({ id, onSuccess, onCancel }: UseRentPaymentFo
       setApiError(null);
       try {
         const payment = await RentPaymentsApi.getRentPaymentById(id);
+        setOriginalPayment(payment);
         
         const formattedDate = payment.posting_datetime 
           ? new Date(payment.posting_datetime).toISOString().slice(0, 16) 
@@ -187,9 +190,6 @@ export function useRentPaymentForm({ id, onSuccess, onCancel }: UseRentPaymentFo
     if (!formData.posting_datetime) {
       errors.posting_datetime = "Posting Date/Time is required.";
     }
-    if (!formData.transaction_type.trim()) {
-      errors.transaction_type = "Transaction Type is required.";
-    }
     if (!formData.direction) {
       errors.direction = "Direction is required.";
     }
@@ -215,7 +215,7 @@ export function useRentPaymentForm({ id, onSuccess, onCancel }: UseRentPaymentFo
         room_allotment_id: formData.room_allotment_id,
         against_month: formData.against_month,
         posting_datetime: new Date(formData.posting_datetime).toISOString(),
-        transaction_type: formData.transaction_type,
+        transaction_type: formData.transaction_type || "Rent Payment",
         direction: formData.direction,
         amount: Number(formData.amount),
         remarks: formData.remarks || undefined,
@@ -267,6 +267,7 @@ export function useRentPaymentForm({ id, onSuccess, onCancel }: UseRentPaymentFo
 
   return {
     formData,
+    originalPayment,
     students,
     contracts,
     allotments,

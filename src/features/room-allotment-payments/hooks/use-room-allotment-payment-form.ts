@@ -8,7 +8,7 @@ import {
   ContractEventSummary,
   RentPayment,
 } from "../types";
-import { showSuccess, showError, showLoading, closeLoading } from "@/utils/swal";
+import { showDeleteSuccess, showDeleteError, showLoading, closeLoading, showSuccess, showError } from '@/utils/swal';
 
 const initialFormState: CreateRoomAllotmentPaymentPayload = {
   room_allotment_id: "",
@@ -39,6 +39,7 @@ export function useRoomAllotmentPaymentForm({ id, onSuccess, onCancel }: UseRoom
   const [allotments, setAllotments] = useState<RoomAllotmentSummary[]>([]);
   const [contractEvents, setContractEvents] = useState<ContractEventSummary[]>([]);
   const [availableRentPayments, setAvailableRentPayments] = useState<RentPayment[]>([]);
+  const [originalPayment, setOriginalPayment] = useState<any>(null);
 
   const [isLoadingMetadata, setIsLoadingMetadata] = useState(false);
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
@@ -75,6 +76,7 @@ export function useRoomAllotmentPaymentForm({ id, onSuccess, onCancel }: UseRoom
       try {
         isMappingRef.current = true;
         const payment = await RoomAllotmentPaymentsApi.getRoomAllotmentPaymentById(id);
+        setOriginalPayment(payment);
         
         let summaryText = "";
         if (payment.summary_json) {
@@ -378,6 +380,7 @@ export function useRoomAllotmentPaymentForm({ id, onSuccess, onCancel }: UseRoom
 
   return {
     formData,
+    originalPayment,
     students,
     allotments,
     contractEvents,

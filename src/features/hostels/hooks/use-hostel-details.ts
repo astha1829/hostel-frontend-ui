@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Hostel, HostelFloor, UpdateHostelPayload } from "../types";
 import { HostelApi } from "../api";
-import { showSuccess, showError, showLoading, closeLoading } from "@/utils/swal";
+import { showDeleteSuccess, showDeleteError, showLoading, closeLoading, showSuccess, showError } from '@/utils/swal';
 
 export function useHostelDetails(hostelId: string) {
   const [hostel, setHostel] = useState<Hostel | null>(null);

@@ -75,13 +75,13 @@ export const HostelContractsListPage: React.FC = () => {
   ];
 
   return (
-    <div className="flex flex-col gap-6 animate-in slide-in-from-bottom-4 duration-500">
+    <div className="container-page flex flex-col gap-4 animate-in slide-in-from-bottom-4 duration-500">
       {/* Header */}
       <PageHeader
         title="Hostel Contracts"
         description="Lease contract registry, payment rates, room sharing parameters, and auditor approval checks."
         actions={
-          <Button variant="primary" size="md" onClick={() => router.push("/hostel-contracts/new")} className="shadow-[0_2px_8px_hsl(var(--primary)/0.15)]">
+          <Button className="btn-top-action" onClick={() => router.push("/hostel-contracts/new")}>
             <Plus size={16} />
             <span>Add Contract</span>
           </Button>
@@ -89,7 +89,7 @@ export const HostelContractsListPage: React.FC = () => {
       />
 
       {/* Filters Control Center */}
-      <Card className="mb-2 border-border/70 shadow-sm">
+      <Card className="mt-[16px] border-border/70 shadow-sm">
         <CardContent className="p-4 md:p-5 pt-4 md:pt-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 items-center">
             {/* Search Input */}
@@ -152,7 +152,7 @@ export const HostelContractsListPage: React.FC = () => {
       ) : isLoading ? (
         <TableSkeleton rows={6} />
       ) : (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 mt-[18px]">
           <HostelContractsTable
             contracts={contracts}
             sortBy={sortBy}

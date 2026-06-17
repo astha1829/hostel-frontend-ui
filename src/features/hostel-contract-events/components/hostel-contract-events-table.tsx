@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Trash2, Edit3, Calendar, ArrowRight } from "lucide-react";
 import { TableContainer, Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { ActionButtons } from "@/components/ui/action-buttons";
 import { HostelContractEvent } from "../types";
 
 interface HostelContractEventsTableProps {
@@ -89,15 +89,15 @@ export const HostelContractEventsTable: React.FC<HostelContractEventsTableProps>
     <TableContainer className="border border-border/80 shadow-sm overflow-visible rounded-lg">
       <Table>
         <TableHeader>
-          <TableRow className="bg-secondary/20">
-            <TableHead className="w-[12%] align-middle font-semibold uppercase tracking-wider text-xs">
+          <TableRow className="bg-secondary/20 h-[44px]">
+            <TableHead className="w-[12%] align-middle table-header leading-[1.4]">
               Event ID
             </TableHead>
-            <TableHead className="w-[20%] align-middle font-semibold uppercase tracking-wider text-xs">
+            <TableHead className="w-[20%] align-middle table-header leading-[1.4]">
               Student
             </TableHead>
             <TableHead 
-              className="w-[10%] cursor-pointer align-middle hover:bg-secondary/40 transition-colors group font-semibold uppercase tracking-wider text-xs"
+              className="w-[10%] cursor-pointer align-middle hover:bg-secondary/40 transition-colors group table-header leading-[1.4]"
               onClick={() => onSort("action_type")}
             >
               <div className="flex items-center gap-1">
@@ -106,7 +106,7 @@ export const HostelContractEventsTable: React.FC<HostelContractEventsTableProps>
               </div>
             </TableHead>
             <TableHead 
-              className="w-[10%] cursor-pointer align-middle hover:bg-secondary/40 transition-colors group font-semibold uppercase tracking-wider text-xs"
+              className="w-[10%] cursor-pointer align-middle hover:bg-secondary/40 transition-colors group table-header leading-[1.4]"
               onClick={() => onSort("event_status")}
             >
               <div className="flex items-center gap-1">
@@ -114,14 +114,14 @@ export const HostelContractEventsTable: React.FC<HostelContractEventsTableProps>
                 <SortIndicator field="event_status" />
               </div>
             </TableHead>
-            <TableHead className="w-[18%] align-middle font-semibold uppercase tracking-wider text-xs">
+            <TableHead className="w-[18%] align-middle table-header leading-[1.4]">
               Contract Transition
             </TableHead>
-            <TableHead className="w-[18%] align-middle font-semibold uppercase tracking-wider text-xs">
+            <TableHead className="w-[18%] align-middle table-header leading-[1.4]">
               Allotment Transition
             </TableHead>
             <TableHead 
-              className="w-[8%] cursor-pointer align-middle hover:bg-secondary/40 transition-colors group font-semibold uppercase tracking-wider text-xs"
+              className="w-[8%] cursor-pointer align-middle hover:bg-secondary/40 transition-colors group table-header leading-[1.4]"
               onClick={() => onSort("effective_date")}
             >
               <div className="flex items-center gap-1">
@@ -129,7 +129,7 @@ export const HostelContractEventsTable: React.FC<HostelContractEventsTableProps>
                 <SortIndicator field="effective_date" />
               </div>
             </TableHead>
-            <TableHead className="w-[6%] text-center align-middle text-xs font-bold uppercase tracking-wider text-muted-foreground/80">
+            <TableHead className="w-[6%] text-center align-middle table-header leading-[1.4]">
               Actions
             </TableHead>
           </TableRow>
@@ -160,12 +160,12 @@ export const HostelContractEventsTable: React.FC<HostelContractEventsTableProps>
               return (
                 <TableRow
                   key={event.id}
-                  className="cursor-pointer hover:bg-secondary/20 transition-colors"
+                  className="h-[56px] min-h-[56px] cursor-pointer hover:bg-secondary/20 transition-colors"
                   onClick={() => router.push(`/hostel-contract-events/${event.id}`)}
                 >
                   {/* Event Identifier / Number */}
                   <TableCell className="align-middle">
-                    <span className="font-semibold text-primary font-mono text-[13px] hover:underline">
+                    <span className="text-[15px] font-[500] text-[#0F172A] hover:underline leading-[1.5]">
                       {event.id.substring(0, 8).toUpperCase()}
                     </span>
                   </TableCell>
@@ -177,11 +177,11 @@ export const HostelContractEventsTable: React.FC<HostelContractEventsTableProps>
                         {studentInitials}
                       </div>
                       <div className="flex flex-col justify-center">
-                        <span className="font-bold text-foreground leading-snug text-sm">
+                        <span className="text-[15px] font-[500] text-[#0F172A] leading-[1.5]">
                           {studentName}
                         </span>
                         {studentPassId && (
-                          <span className="text-xs font-mono text-muted-foreground mt-0.5 font-medium leading-none">
+                          <span className="text-[14px] font-[400] text-[#64748B] mt-0.5 leading-[1.5]">
                             {studentPassId}
                           </span>
                         )}
@@ -206,40 +206,40 @@ export const HostelContractEventsTable: React.FC<HostelContractEventsTableProps>
                   {/* Contract Transition */}
                   <TableCell className="align-middle">
                     {hasContractTransition ? (
-                      <div className="flex items-center gap-2 text-[13px] flex-nowrap">
-                        <span className={`font-medium py-1 px-2 rounded-sm border whitespace-nowrap ${event.source_hostel_contract_name ? "text-foreground bg-secondary border-border" : "text-muted-foreground bg-secondary border-border"}`}>
+                      <div className="flex items-center gap-2 text-[15px] font-[500] text-[#0F172A] leading-[1.5] flex-nowrap">
+                        <span className={`font-[500] py-1 px-2 rounded-sm border whitespace-nowrap ${event.source_hostel_contract_name ? "text-foreground bg-secondary border-border" : "text-[#64748B] bg-secondary border-border"}`}>
                           {event.source_hostel_contract_name || "None"}
                         </span>
-                        <ArrowRight size={14} className="text-muted-foreground shrink-0" />
-                        <span className={`font-semibold py-1 px-2 rounded-sm border whitespace-nowrap ${event.target_hostel_contract_name ? "text-primary bg-primary/5 border-primary/15" : "text-primary bg-primary/5 border-primary/15"}`}>
+                        <ArrowRight size={14} className="text-[#64748B] shrink-0" />
+                        <span className={`font-[700] py-1 px-2 rounded-sm border whitespace-nowrap ${event.target_hostel_contract_name ? "text-primary bg-primary/5 border-primary/15" : "text-primary bg-primary/5 border-primary/15"}`}>
                           {event.target_hostel_contract_name || "None"}
                         </span>
                       </div>
                     ) : (
-                      <span className="text-muted-foreground">—</span>
+                      <span className="text-[#64748B] text-[15px] font-[500] leading-[1.5]">—</span>
                     )}
                   </TableCell>
 
                   {/* Allotment Transition */}
                   <TableCell className="align-middle">
                     {hasAllotmentTransition ? (
-                      <div className="flex items-center gap-2 text-[13px] flex-nowrap">
-                        <span className={`font-medium py-1 px-2 rounded-sm border whitespace-nowrap ${event.source_room_allotment_name ? "text-foreground bg-secondary border-border" : "text-muted-foreground bg-secondary border-border"}`}>
+                      <div className="flex items-center gap-2 text-[15px] font-[500] text-[#0F172A] leading-[1.5] flex-nowrap">
+                        <span className={`font-[500] py-1 px-2 rounded-sm border whitespace-nowrap ${event.source_room_allotment_name ? "text-foreground bg-secondary border-border" : "text-[#64748B] bg-secondary border-border"}`}>
                           {event.source_room_allotment_name || "None"}
                         </span>
-                        <ArrowRight size={14} className="text-muted-foreground shrink-0" />
-                        <span className={`font-semibold py-1 px-2 rounded-sm border whitespace-nowrap ${event.target_room_allotment_name ? "text-primary bg-primary/5 border-primary/15" : "text-primary bg-primary/5 border-primary/15"}`}>
+                        <ArrowRight size={14} className="text-[#64748B] shrink-0" />
+                        <span className={`font-[700] py-1 px-2 rounded-sm border whitespace-nowrap ${event.target_room_allotment_name ? "text-primary bg-primary/5 border-primary/15" : "text-primary bg-primary/5 border-primary/15"}`}>
                           {event.target_room_allotment_name || "None"}
                         </span>
                       </div>
                     ) : (
-                      <span className="text-muted-foreground">—</span>
+                      <span className="text-[#64748B] text-[15px] font-[500] leading-[1.5]">—</span>
                     )}
                   </TableCell>
 
                   {/* Effective Date */}
                   <TableCell className="align-middle">
-                    <div className="flex items-center gap-1.5 text-muted-foreground text-[13px]">
+                    <div className="flex items-center gap-1.5 text-[14px] font-[400] text-[#64748B] leading-[1.5]">
                       <Calendar size={14} className="shrink-0" />
                       <span>{formatDate(event.effective_date)}</span>
                     </div>
@@ -247,26 +247,11 @@ export const HostelContractEventsTable: React.FC<HostelContractEventsTableProps>
 
                   {/* Actions Column */}
                   <TableCell className="text-center align-middle" onClick={(e) => e.stopPropagation()}>
-                    <div className="flex gap-1 justify-center items-center">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => router.push(`/hostel-contract-events/${event.id}/edit`)}
-                        className="p-1.5 h-8 w-8 text-muted-foreground/80 hover:text-primary hover:bg-primary/10 transition-colors"
-                        title="Edit event"
-                      >
-                        <Edit3 size={15} />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onDelete(event.id)}
-                        className="p-1.5 h-8 w-8 text-destructive hover:bg-destructive/10 transition-colors"
-                        title="Delete entry"
-                      >
-                        <Trash2 size={15} />
-                      </Button>
-                    </div>
+                    <ActionButtons 
+                      onEdit={() => router.push(`/hostel-contract-events/${event.id}/edit`)}
+                      onDelete={() => onDelete(event.id)}
+                      deleteConfirmMessage="Are you sure you want to delete this event?"
+                    />
                   </TableCell>
                 </TableRow>
               );

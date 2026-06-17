@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { StudentsApi } from "../api";
 import { CreateStudentPayload } from "../types";
 import { Hostel } from "../../hostels/types";
-import { showSuccess, showError, showLoading, closeLoading } from "@/utils/swal";
+import { showDeleteSuccess, showDeleteError, showLoading, closeLoading, showSuccess, showError } from '@/utils/swal';
 
 const initialFormState: CreateStudentPayload = {
   user_id: "",

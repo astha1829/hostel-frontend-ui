@@ -2,21 +2,21 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Plus, ChevronLeft, ChevronRight, Building, Hash, Layers, Home } from "lucide-react";
-import { PageHeader } from "@/components/ui/page-header";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
+import { 
+  Search, Plus, ChevronLeft, ChevronRight, Layers, Home, BedDouble, Filter 
+} from "lucide-react";
 import { TableSkeleton } from "@/components/ui/loading-skeleton";
 import { ErrorState } from "@/components/ui/error-state";
 import { useHostelFloors } from "../hooks/use-hostel-floors";
 import { HostelFloorsTable } from "./hostel-floors-table";
 import { CreateHostelFloorModal } from "./create-hostel-floor-modal";
+import { PageHeader } from "@/components/ui/page-header";
+import { Button } from "@/components/ui/button";
 
 export const HostelFloorsListPage: React.FC = () => {
   const router = useRouter();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
+  const [selectedStatus, setSelectedStatus] = useState<string>("all");
 
   const {
     floors,
@@ -37,178 +37,127 @@ export const HostelFloorsListPage: React.FC = () => {
   } = useHostelFloors();
 
   const handleRowClick = (id: string) => {
-    // Navigate to single floor details route
     router.push(`/hostel-floors/${id}`);
   };
 
-  const hostelFilterOptions = [
-    { label: "All Hostels", value: "all" },
-    ...hostels.map((h) => ({
-      label: h.hostel_name,
-      value: h.id,
-    })),
-  ];
-
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-      {/* Header Bar */}
+    <div className="container-page flex flex-col gap-4 pb-4 bg-[#F8FAFC] font-inter animate-slide-in">
+      {/* Page Header */}
       <PageHeader
-        title="Hostel Floors Directory"
-        description="Oversee room series allocations, floor properties, and capacities across student residences."
+        title="Hostel Floors"
+        description="Oversee floor series allocations, room configurations, and bed capacities."
         actions={
-          <Button variant="primary" size="md" onClick={() => setIsCreateModalOpen(true)} style={{ boxShadow: "0 2px 8px hsl(var(--primary) / 0.15)" }}>
+          <Button 
+            variant="primary" 
+            size="md" 
+            onClick={() => setIsCreateModalOpen(true)}
+          >
             <Plus size={16} />
-            <span>Add Hostel Floor</span>
+            <span>Add Floor</span>
           </Button>
         }
       />
 
-      {/* Operational Summary Grid */}
-      <div style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-        gap: "1rem",
-        marginBottom: "0.25rem"
-      }}>
-        {/* Card 1: Total Floors */}
-        <Card style={{ position: "relative", overflow: "hidden", borderLeft: "4px solid hsl(var(--primary))", transition: "var(--transition)" }} className="card">
-          <CardContent style={{ padding: "1.25rem", display: "flex", alignItems: "center", gap: "1rem" }}>
-            <div style={{
-              width: "2.75rem",
-              height: "2.75rem",
-              borderRadius: "var(--radius-md)",
-              backgroundColor: "hsl(var(--primary) / 0.1)",
-              color: "hsl(var(--primary))",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}>
-              <Layers size={20} />
-            </div>
-            <div>
-              <p style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>Total Floors</p>
-              <h3 style={{ fontSize: "1.5rem", fontWeight: 700, marginTop: "0.125rem" }}>
-                {stats.isLoading ? "..." : stats.totalFloors}
-              </h3>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Card 2: Room Series */}
-        <Card style={{ position: "relative", overflow: "hidden", borderLeft: "4px solid hsl(var(--warning))", transition: "var(--transition)" }} className="card">
-          <CardContent style={{ padding: "1.25rem", display: "flex", alignItems: "center", gap: "1rem" }}>
-            <div style={{
-              width: "2.75rem",
-              height: "2.75rem",
-              borderRadius: "var(--radius-md)",
-              backgroundColor: "hsl(var(--warning) / 0.12)",
-              color: "hsl(var(--warning))",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}>
-              <Hash size={20} />
-            </div>
-            <div>
-              <p style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>Configured Series</p>
-              <h3 style={{ fontSize: "1.5rem", fontWeight: 700, marginTop: "0.125rem" }}>
-                {stats.isLoading ? "..." : stats.uniqueSeries}
-              </h3>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Card 3: Total Rooms */}
-        <Card style={{ position: "relative", overflow: "hidden", borderLeft: "4px solid hsl(var(--success))", transition: "var(--transition)" }} className="card">
-          <CardContent style={{ padding: "1.25rem", display: "flex", alignItems: "center", gap: "1rem" }}>
-            <div style={{
-              width: "2.75rem",
-              height: "2.75rem",
-              borderRadius: "var(--radius-md)",
-              backgroundColor: "hsl(var(--success) / 0.15)",
-              color: "hsl(var(--success))",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}>
-              <Home size={20} />
-            </div>
-            <div>
-              <p style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>Operational Rooms</p>
-              <h3 style={{ fontSize: "1.5rem", fontWeight: 700, marginTop: "0.125rem" }}>
-                {stats.isLoading ? "..." : stats.totalRooms}
-              </h3>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Card 4: Hostels Covered */}
-        <Card style={{ position: "relative", overflow: "hidden", borderLeft: "4px solid hsl(var(--destructive))", transition: "var(--transition)" }} className="card">
-          <CardContent style={{ padding: "1.25rem", display: "flex", alignItems: "center", gap: "1rem" }}>
-            <div style={{
-              width: "2.75rem",
-              height: "2.75rem",
-              borderRadius: "var(--radius-md)",
-              backgroundColor: "hsl(var(--destructive) / 0.1)",
-              color: "hsl(var(--destructive))",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}>
-              <Building size={20} />
-            </div>
-            <div>
-              <p style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>Hostels Covered</p>
-              <h3 style={{ fontSize: "1.5rem", fontWeight: 700, marginTop: "0.125rem" }}>
-                {stats.isLoading ? "..." : stats.hostelsCovered}
-              </h3>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Filtering Options Panel */}
-      <Card style={{ border: "1px solid hsl(var(--border) / 0.85)", boxShadow: "var(--shadow-sm)" }}>
-        <CardContent style={{ padding: "1.25rem" }}>
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-            <div style={{ fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "hsl(var(--muted-foreground) / 1.3)" }}>
-              Search & Filter Floors
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-
-              {/* Search Input */}
-              <div className="relative md:col-span-8 lg:col-span-8">
-                <Input
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Search by room series prefix..."
-                  style={{ paddingLeft: "2.5rem" }}
-                />
-                <Search
-                  size={18}
-                  style={{
-                    position: "absolute",
-                    left: "0.875rem",
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    color: "hsl(var(--muted-foreground))",
-                    pointerEvents: "none",
-                  }}
-                />
-              </div>
-
-              {/* Hostel Filter */}
-              <div className="md:col-span-4 lg:col-span-4">
-                <Select
-                  value={selectedHostelId}
-                  onChange={(e) => setSelectedHostelId(e.target.value)}
-                  options={hostelFilterOptions}
-                />
-              </div>
+      {/* Stats Cards Grid - Premium SaaS Style */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Total Floors */}
+        <div className="bg-[#FFFFFF] border border-[#E2E8F0] rounded-[12px] p-[16px] hover:-translate-y-[2px] transition-all duration-200 shadow-sm flex flex-col justify-between">
+          <div className="flex justify-between items-start mb-3">
+            <span className="text-[14px] font-[600] text-[#64748B] tracking-tight">Total Floors</span>
+            <div className="w-[32px] h-[32px] rounded-[8px] bg-[#F4F1FF] text-[#6D4CFF] flex items-center justify-center shrink-0">
+              <Layers size={16} />
             </div>
           </div>
-        </CardContent>
-      </Card>
+          <div className="flex flex-col gap-1.5">
+            <span className="text-[32px] font-[800] text-[#0F172A] leading-none tracking-tight">
+              {stats?.isLoading ? "-" : (stats?.totalFloors || 0)}
+            </span>
+            <span className="text-[13px] font-[500] text-[#64748B]">Allocated across all hostels</span>
+          </div>
+        </div>
+
+        {/* Active Rooms */}
+        <div className="bg-[#FFFFFF] border border-[#E2E8F0] rounded-[12px] p-[16px] hover:-translate-y-[2px] transition-all duration-200 shadow-sm flex flex-col justify-between">
+          <div className="flex justify-between items-start mb-3">
+            <span className="text-[14px] font-[600] text-[#64748B] tracking-tight">Generated Rooms</span>
+            <div className="w-[32px] h-[32px] rounded-[8px] bg-[#DCFCE7] text-[#22C55E] flex items-center justify-center shrink-0">
+              <Home size={16} />
+            </div>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <span className="text-[32px] font-[800] text-[#0F172A] leading-none tracking-tight">
+              {stats?.isLoading ? "-" : (stats?.totalRooms || 0)}
+            </span>
+            <span className="text-[13px] font-[500] text-[#64748B]">Currently configured rooms</span>
+          </div>
+        </div>
+
+        {/* Bed Capacity */}
+        <div className="bg-[#FFFFFF] border border-[#E2E8F0] rounded-[12px] p-[16px] hover:-translate-y-[2px] transition-all duration-200 shadow-sm flex flex-col justify-between">
+          <div className="flex justify-between items-start mb-3">
+            <span className="text-[14px] font-[600] text-[#64748B] tracking-tight">Total Bed Capacity</span>
+            <div className="w-[32px] h-[32px] rounded-[8px] bg-[#FEF3C7] text-[#F59E0B] flex items-center justify-center shrink-0">
+              <BedDouble size={16} />
+            </div>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <span className="text-[32px] font-[800] text-[#0F172A] leading-none tracking-tight">
+              {stats?.isLoading ? "-" : (stats?.totalBeds || 0)}
+            </span>
+            <span className="text-[13px] font-[500] text-[#64748B]">Available bed placements</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Filters Bar */}
+      <div className="bg-[#FFFFFF] rounded-[12px] px-4 py-3 border border-[#E2E8F0] shadow-sm flex flex-col md:flex-row items-center gap-3">
+        <div className="relative flex-1 w-full">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#64748B]" />
+          <input 
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search by floor or series..."
+            className="w-full h-[44px] pl-9 pr-4 rounded-[8px] border border-[#E2E8F0] text-[15px] font-[500] outline-none focus:border-[#6D4CFF] focus:ring-1 focus:ring-[#6D4CFF] transition-all bg-[#FFFFFF] text-[#0F172A] placeholder:text-[#94A3B8]"
+          />
+        </div>
+
+        <div className="w-full md:w-[220px] shrink-0 relative">
+          <select
+            value={selectedHostelId}
+            onChange={(e) => setSelectedHostelId(e.target.value)}
+            className="w-full h-[44px] px-3 pr-8 rounded-[8px] border border-[#E2E8F0] text-[15px] font-[500] outline-none focus:border-[#6D4CFF] transition-colors bg-[#FFFFFF] text-[#0F172A] appearance-none"
+            style={{ backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2364748B%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m6%209%206%206%206-6%22%2F%3E%3C%2Fsvg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 8px top 50%', backgroundSize: '16px auto' }}
+          >
+            <option value="all">All Hostels</option>
+            {hostels.map(h => (
+              <option key={h.id} value={h.id}>{h.hostel_name}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="w-full md:w-[180px] shrink-0 relative">
+          <select
+            value={selectedStatus}
+            onChange={(e) => setSelectedStatus(e.target.value)}
+            className="w-full h-[44px] px-3 pr-8 rounded-[8px] border border-[#E2E8F0] text-[15px] font-[500] outline-none focus:border-[#6D4CFF] transition-colors bg-[#FFFFFF] text-[#0F172A] appearance-none"
+            style={{ backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2364748B%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m6%209%206%206%206-6%22%2F%3E%3C%2Fsvg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 8px top 50%', backgroundSize: '16px auto' }}
+          >
+            <option value="all">All Statuses</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+
+        <button className="h-[44px] px-4 rounded-[8px] border border-[#E2E8F0] bg-[#FFFFFF] text-[#64748B] font-[600] text-[14px] flex items-center justify-center gap-2 hover:bg-[#F8FAFC] transition-colors">
+          <Filter size={16} />
+          Filters
+        </button>
+
+        <Button size="md" onClick={reload} className="px-6">
+          Search
+        </Button>
+      </div>
 
       {/* Main Content Area */}
       {error ? (
@@ -221,54 +170,43 @@ export const HostelFloorsListPage: React.FC = () => {
       ) : isLoading ? (
         <TableSkeleton rows={6} />
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-          {/* Table list */}
-          <HostelFloorsTable floors={floors} onRowClick={handleRowClick} onDelete={handleDelete} />
+        <div className="flex flex-col gap-4">
+          <div className="bg-[#FFFFFF] rounded-[12px] shadow-sm border border-[#E2E8F0] overflow-hidden">
+            <HostelFloorsTable floors={floors} onRowClick={handleRowClick} onDelete={handleDelete} />
+          </div>
 
-          {/* Pagination Controls */}
+          {/* Pagination */}
           {totalPages > 1 && (
-            <div style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: "0.5rem 0.25rem"
-            }} className="pagination-bar">
-              <span style={{ fontSize: "0.875rem", color: "hsl(var(--muted-foreground))", fontWeight: 500 }}>
-                Showing <strong style={{ color: "hsl(var(--foreground))" }}>{floors.length}</strong> of <strong style={{ color: "hsl(var(--foreground))" }}>{total}</strong> floor records
+            <div className="flex justify-between items-center px-2 py-1">
+              <span className="text-[14px] font-[500] text-[#64748B]">
+                Showing {((currentPage - 1) * 10) + 1} to {Math.min(currentPage * 10, total)} of {total} results
               </span>
-
-              <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-                <Button
-                  variant="outline"
-                  size="sm"
+              <div className="flex items-center gap-2">
+                <button
                   onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
-                  style={{ padding: "0.375rem 0.5rem" }}
+                  className="w-9 h-9 rounded-[8px] border border-[#E2E8F0] bg-[#FFFFFF] flex items-center justify-center text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   <ChevronLeft size={16} />
-                </Button>
-
-                <span style={{ fontSize: "0.875rem", fontWeight: 600 }}>
-                  Page {currentPage} of {totalPages}
-                </span>
-
-                <Button
-                  variant="outline"
-                  size="sm"
+                </button>
+                <div className="w-9 h-9 rounded-[8px] bg-[#6D4CFF] flex items-center justify-center text-[#FFFFFF] font-[600] text-[14px]">
+                  {currentPage}
+                </div>
+                <button
                   onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                   disabled={currentPage === totalPages}
-                  style={{ padding: "0.375rem 0.5rem" }}
+                  className="w-9 h-9 rounded-[8px] border border-[#E2E8F0] bg-[#FFFFFF] flex items-center justify-center text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   <ChevronRight size={16} />
-                </Button>
+                </button>
               </div>
             </div>
           )}
         </div>
       )}
 
-      {/* Centered Modal Creation Form */}
-      <CreateHostelFloorModal
+      {/* Modal */}
+        <CreateHostelFloorModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onSuccess={reload}

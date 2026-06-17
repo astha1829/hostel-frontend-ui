@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { HostelContractHistoryApi } from "../api";
 import { HostelContractHistoryRow, StudentSummary } from "../types";
-import { showDeleteConfirm, showSuccess, showError, showLoading, closeLoading } from "@/utils/swal";
+import { showDeleteConfirm, showDeleteSuccess, showDeleteError, showLoading, closeLoading } from "@/utils/swal";
 
 export const useHostelContractHistory = () => {
   const [history, setHistory] = useState<HostelContractHistoryRow[]>([]);
@@ -82,12 +82,12 @@ export const useHostelContractHistory = () => {
     try {
       await HostelContractHistoryApi.deleteHostelContractHistory(id);
       closeLoading();
-      await showSuccess("Deleted Successfully", "Record has been removed successfully.");
+      await showDeleteSuccess();
       await loadData();
       return true;
     } catch (err: any) {
       closeLoading();
-      showError("Delete Failed", err.message || "Failed to delete contract history row.");
+      await showDeleteError();
       return false;
     }
   };

@@ -21,9 +21,10 @@ import { StudentWalletTab } from "@/features/wallet/components/student-wallet-ta
 
 interface StudentDetailsPageProps {
   id: string;
+  initialEditMode?: boolean;
 }
 
-export const StudentDetailsPage: React.FC<StudentDetailsPageProps> = ({ id }) => {
+export const StudentDetailsPage: React.FC<StudentDetailsPageProps> = ({ id, initialEditMode = false }) => {
   const [activeTab, setActiveTab] = useState<string>("basic");
   const [copied, setCopied] = useState<boolean>(false);
 
@@ -43,7 +44,7 @@ export const StudentDetailsPage: React.FC<StudentDetailsPageProps> = ({ id }) =>
     handleFileChange,
     saveChanges,
     reload,
-  } = useStudentDetails(id);
+  } = useStudentDetails(id, initialEditMode);
 
   const isDirty = React.useMemo(() => {
     if (!student) return false;
@@ -104,7 +105,7 @@ export const StudentDetailsPage: React.FC<StudentDetailsPageProps> = ({ id }) =>
   const getFileUrl = (path?: string | null): string => {
     if (!path) return "";
     if (path.startsWith("http://") || path.startsWith("https://")) return path;
-    const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000/api";
+    const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8000/api";
     const backendHost = apiBase.replace(/\/api\/?$/, "");
     return `${backendHost}/${path}`;
   };
@@ -133,7 +134,7 @@ export const StudentDetailsPage: React.FC<StudentDetailsPageProps> = ({ id }) =>
             <X size={16} />
             <span>Cancel</span>
           </Button>
-          <Button variant="primary" size="md" onClick={saveChanges} isLoading={isSaving}>
+          <Button className="btn-top-action">
             <Save size={16} />
             <span>Save Changes</span>
           </Button>
@@ -143,7 +144,7 @@ export const StudentDetailsPage: React.FC<StudentDetailsPageProps> = ({ id }) =>
           <Button variant="outline" size="md" onClick={reload} className="px-2" title="Reload details">
             <RefreshCw size={16} />
           </Button>
-          <Button variant="primary" size="md" onClick={toggleEditMode}>
+          <Button className="btn-top-action">
             <Edit2 size={16} />
             <span>Edit Profile</span>
           </Button>
@@ -180,7 +181,7 @@ export const StudentDetailsPage: React.FC<StudentDetailsPageProps> = ({ id }) =>
             <FileText size={16} />
           </div>
           <div className="flex flex-col">
-            <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{label}</span>
+            <span className="form-label">{label}</span>
             <span className="text-xs text-muted-foreground/80 mt-0.5 italic">No file attached</span>
           </div>
         </div>
@@ -191,14 +192,14 @@ export const StudentDetailsPage: React.FC<StudentDetailsPageProps> = ({ id }) =>
     const fileName = path.split("/").pop() || "download";
 
     return (
-      <div 
+      <div
         className="flex items-center justify-between py-3 px-4 border border-border rounded-md bg-card shadow-sm transition-all room-pill-hover hover:border-primary/40 hover:shadow-md"
       >
         <div className="flex items-center gap-3 overflow-hidden flex-1">
           <div className="w-9 h-9 rounded-sm overflow-hidden border border-border bg-secondary flex items-center justify-center shrink-0">
-            <img 
-              src={fileUrl} 
-              alt={label} 
+            <img
+              src={fileUrl}
+              alt={label}
               onError={(e) => {
                 (e.target as HTMLElement).style.display = 'none';
                 const parent = (e.target as HTMLElement).parentElement;
@@ -213,7 +214,7 @@ export const StudentDetailsPage: React.FC<StudentDetailsPageProps> = ({ id }) =>
             />
           </div>
           <div className="flex flex-col overflow-hidden flex-1">
-            <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{label}</span>
+            <span className="form-label">{label}</span>
             <a
               href={fileUrl}
               target="_blank"
@@ -240,19 +241,17 @@ export const StudentDetailsPage: React.FC<StudentDetailsPageProps> = ({ id }) =>
 
   // Helper component to render reviewed/verified indicator flags
   const VerificationIndicator = ({ label, isTrue }: { label: string; isTrue: boolean }) => (
-    <div className={`flex items-center gap-2.5 py-2.5 px-3.5 rounded-md border transition-all ${
-      isTrue 
-        ? "border-success/15 bg-success/5" 
-        : "border-border/60 bg-secondary/15"
-    }`}>
+    <div className={`flex items-center gap-2.5 py-2.5 px-3.5 rounded-md border transition-all ${isTrue
+      ? "border-success/15 bg-success/5"
+      : "border-border/60 bg-secondary/15"
+      }`}>
       {isTrue ? (
         <CheckCircle2 size={16} className="text-success shrink-0" />
       ) : (
         <div className="w-4 h-4 rounded-full border border-dashed border-muted-foreground/60 shrink-0" />
       )}
-      <span className={`text-[13px] font-semibold tracking-tight ${
-        isTrue ? "text-foreground" : "text-muted-foreground"
-      }`}>
+      <span className={`text-[13px] font-semibold tracking-tight ${isTrue ? "text-foreground" : "text-muted-foreground"
+        }`}>
         {label}
       </span>
     </div>
@@ -290,11 +289,10 @@ export const StudentDetailsPage: React.FC<StudentDetailsPageProps> = ({ id }) =>
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`px-1 py-3 text-[15px] font-semibold bg-transparent border-none border-b-2 cursor-pointer transition-all duration-200 ${
-              activeTab === tab.id
-                ? "border-primary text-primary"
-                : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
-            }`}
+            className={`px-1 py-3 text-[15px] font-semibold bg-transparent border-none border-b-2 cursor-pointer transition-all duration-200 ${activeTab === tab.id
+              ? "border-primary text-primary"
+              : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
+              }`}
           >
             {tab.label}
           </button>
@@ -303,20 +301,20 @@ export const StudentDetailsPage: React.FC<StudentDetailsPageProps> = ({ id }) =>
 
       {/* Basic Details View / Edit */}
       {activeTab === "basic" && (
-        <div className="flex flex-col gap-6 animate-in slide-in-from-bottom-4 duration-500">
-          
+        <div className="container-page flex flex-col gap-6 animate-in slide-in-from-bottom-4 duration-500">
+
           {/* Student Profile Summary Header Card */}
           {!isEditMode && (
             <Card className="p-8 bg-gradient-to-b from-card to-secondary/10 border-border rounded-xl flex flex-col gap-6 relative overflow-hidden">
               {/* Background glow */}
               <div className="absolute -top-[50px] -right-[50px] w-[200px] h-[200px] bg-primary/5 blur-[40px] rounded-full pointer-events-none" />
-              
+
               <div className="flex gap-7 items-center flex-wrap z-10">
                 {/* Profile Avatar */}
                 <div className="relative">
                   {student.profile_pic ? (
-                    <img 
-                      src={getFileUrl(student.profile_pic)} 
+                    <img
+                      src={getFileUrl(student.profile_pic)}
                       alt={student.student_name}
                       className="w-[5.5rem] h-[5.5rem] rounded-full object-cover border-[3px] border-card shadow-[0_0_0_2px_hsl(var(--primary)/0.2),var(--shadow-md)]"
                     />
@@ -330,7 +328,7 @@ export const StudentDetailsPage: React.FC<StudentDetailsPageProps> = ({ id }) =>
                 {/* Name & Quick Details */}
                 <div className="flex flex-col gap-2 flex-1 min-w-[200px]">
                   <div className="flex items-center gap-3 flex-wrap">
-                    <h2 className="text-2xl font-extrabold tracking-tight text-foreground m-0">
+                    <h2 className="section-title">
                       {student.student_name} {student.last_name || ""}
                     </h2>
                     {getKycStatusBadge(student.kyc_verified)}
@@ -350,13 +348,13 @@ export const StudentDetailsPage: React.FC<StudentDetailsPageProps> = ({ id }) =>
 
                   {/* Reg ID Copy Strip */}
                   <div className="flex items-center gap-2 mt-1">
-                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Reg ID:</span>
+                    <span className="form-label">Reg ID:</span>
                     <code className="text-[13px] font-mono px-2 py-0.5 bg-secondary border border-border/80 rounded-sm text-foreground font-semibold">
                       {student.student_registration_id || "UNASSIGNED"}
                     </code>
                     {student.student_registration_id && (
-                      <button 
-                        onClick={handleCopyRegistration} 
+                      <button
+                        onClick={handleCopyRegistration}
                         className="bg-transparent border-none text-primary cursor-pointer p-1 inline-flex rounded-sm transition-colors hover:bg-primary/10"
                         title="Copy Registration ID"
                       >
@@ -372,24 +370,24 @@ export const StudentDetailsPage: React.FC<StudentDetailsPageProps> = ({ id }) =>
               {/* Quick Stats Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5 z-10">
                 <div className="flex flex-col gap-1.5">
-                  <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Assigned Residence</span>
+                  <span className="form-label">Assigned Residence</span>
                   <span className="text-[15px] font-bold text-primary">
                     {student.hostel?.hostel_name || "No Hostel Assigned"}
                   </span>
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Nationality</span>
-                  <span className="text-[15px] font-bold text-foreground">{student.nationality}</span>
+                  <span className="form-label">Nationality</span>
+                  <span className="body-text-primary">{student.nationality}</span>
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Meal Preference</span>
-                  <span className="text-[15px] font-bold text-foreground">
+                  <span className="form-label">Meal Preference</span>
+                  <span className="body-text-primary">
                     {student.meal_type === "Veg" ? "Vegetarian (Veg)" : student.meal_type === "Non-Veg" ? "Non-Vegetarian (Non-Veg)" : student.meal_type || "Veg"}
                   </span>
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Gender & DOB</span>
-                  <span className="text-[15px] font-bold text-foreground">
+                  <span className="form-label">Gender & DOB</span>
+                  <span className="body-text-primary">
                     {student.gender || "—"} {student.date_of_birth ? `(${new Date(student.date_of_birth).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })})` : ""}
                   </span>
                 </div>
@@ -400,7 +398,7 @@ export const StudentDetailsPage: React.FC<StudentDetailsPageProps> = ({ id }) =>
           {/* Form Content */}
           {isEditMode ? (
             <div className="flex flex-col gap-6">
-              
+
               {/* SECTION: Basic Details */}
               <SectionCard title="Edit Personal & College Details" description="Fill in standard identification details and institutional affiliations.">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -596,7 +594,7 @@ export const StudentDetailsPage: React.FC<StudentDetailsPageProps> = ({ id }) =>
               <SectionCard title="Student KYC Reviews" description="Manage verification, verification status flags, and reviews metadata.">
                 <div className="flex flex-col gap-5">
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    
+
                     {/* Checkbox fields */}
                     <div className="flex items-center gap-2">
                       <input
@@ -740,200 +738,200 @@ export const StudentDetailsPage: React.FC<StudentDetailsPageProps> = ({ id }) =>
           ) : (
             // VIEW MODE: Grouped sections with premium typography
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-in slide-in-from-bottom-4 duration-500">
-                
-                {/* Left Column: Student metadata */}
-                <div className="lg:col-span-2 flex flex-col gap-6">
-                  
-                  {/* Personal & College details */}
-                  <SectionCard title="Academic & Enrollment Profile" description="Institutional credentials, user identifiers, and registration categories.">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8">
-                      <div className="flex flex-col gap-1 border-b border-border/50 pb-2">
-                        <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Given Name</span>
-                        <span className="text-[15px] font-semibold text-foreground">{student.student_name}</span>
-                      </div>
-                      <div className="flex flex-col gap-1 border-b border-border/50 pb-2">
-                        <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Last Name</span>
-                        <span className="text-[15px] font-semibold text-foreground">{student.last_name || "—"}</span>
-                      </div>
-                      <div className="flex flex-col gap-1 border-b border-border/50 pb-2">
-                        <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">User ID Identifier</span>
-                        <span className="text-[13px] font-mono px-2 py-0.5 bg-secondary border border-border/80 rounded-sm text-foreground font-semibold self-start mt-0.5">{student.user_id || "—"}</span>
-                      </div>
-                      <div className="flex flex-col gap-1 border-b border-border/50 pb-2">
-                        <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">College / Institution</span>
-                        <span className="text-[15px] font-semibold text-foreground">{student.college}</span>
-                      </div>
-                      <div className="flex flex-col gap-1 border-b border-border/50 pb-2">
-                        <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Course Enrolled</span>
-                        <span className="text-[15px] font-semibold text-foreground">{student.course || "—"}</span>
-                      </div>
-                      <div className="flex flex-col gap-1 border-b border-border/50 pb-2">
-                        <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Enrollment Type Category</span>
-                        <span className="text-[15px] font-semibold text-foreground">{student.student_type}</span>
-                      </div>
-                      <div className="flex flex-col gap-1 border-b border-border/50 pb-2">
-                        <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Nationality</span>
-                        <span className="text-[15px] font-semibold text-foreground">{student.nationality}</span>
-                      </div>
-                      <div className="flex flex-col gap-1 border-b border-border/50 pb-2">
-                        <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Gender Designation</span>
-                        <span className="text-[15px] font-semibold text-foreground">{student.gender || "—"}</span>
+
+              {/* Left Column: Student metadata */}
+              <div className="lg:col-span-2 flex flex-col gap-6">
+
+                {/* Personal & College details */}
+                <SectionCard title="Academic & Enrollment Profile" description="Institutional credentials, user identifiers, and registration categories.">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8">
+                    <div className="flex flex-col gap-1 border-b border-border/50 pb-2">
+                      <span className="form-label">Given Name</span>
+                      <span className="body-text-primary">{student.student_name}</span>
+                    </div>
+                    <div className="flex flex-col gap-1 border-b border-border/50 pb-2">
+                      <span className="form-label">Last Name</span>
+                      <span className="body-text-primary">{student.last_name || "—"}</span>
+                    </div>
+                    <div className="flex flex-col gap-1 border-b border-border/50 pb-2">
+                      <span className="form-label">User ID Identifier</span>
+                      <span className="text-[13px] font-mono px-2 py-0.5 bg-secondary border border-border/80 rounded-sm text-foreground font-semibold self-start mt-0.5">{student.user_id || "—"}</span>
+                    </div>
+                    <div className="flex flex-col gap-1 border-b border-border/50 pb-2">
+                      <span className="form-label">College / Institution</span>
+                      <span className="body-text-primary">{student.college}</span>
+                    </div>
+                    <div className="flex flex-col gap-1 border-b border-border/50 pb-2">
+                      <span className="form-label">Course Enrolled</span>
+                      <span className="body-text-primary">{student.course || "—"}</span>
+                    </div>
+                    <div className="flex flex-col gap-1 border-b border-border/50 pb-2">
+                      <span className="form-label">Enrollment Type Category</span>
+                      <span className="body-text-primary">{student.student_type}</span>
+                    </div>
+                    <div className="flex flex-col gap-1 border-b border-border/50 pb-2">
+                      <span className="form-label">Nationality</span>
+                      <span className="body-text-primary">{student.nationality}</span>
+                    </div>
+                    <div className="flex flex-col gap-1 border-b border-border/50 pb-2">
+                      <span className="form-label">Gender Designation</span>
+                      <span className="body-text-primary">{student.gender || "—"}</span>
+                    </div>
+                  </div>
+                </SectionCard>
+
+                {/* Contact & Address info combined */}
+                <SectionCard title="Contact & Residency Credentials" description="Communication touchpoints for notifications, emergency contacts, and home town records.">
+                  <div className="flex flex-col gap-7">
+                    <div>
+                      <h4 className="text-[13px] font-bold uppercase tracking-[0.08em] text-primary mb-4 flex items-center gap-2">
+                        <Phone size={14} />
+                        <span>Contact Channels & Emergencies</span>
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-5 gap-x-6">
+                        <div className="pb-2 border-b border-border/50">
+                          <span className="block form-label">Student Email</span>
+                          {student.student_email ? (
+                            <a href={`mailto:${student.student_email}`} className="inline-flex items-center gap-1.5 text-[15px] font-semibold text-primary mt-1 hover:underline">
+                              <Mail size={14} />
+                              <span>{student.student_email}</span>
+                            </a>
+                          ) : (
+                            <span className="block body-text-secondary mt-1">—</span>
+                          )}
+                        </div>
+                        <div className="pb-2 border-b border-border/50">
+                          <span className="block form-label">Student Mobile</span>
+                          <span className="block body-text-primary mt-1">{student.contact || "—"}</span>
+                        </div>
+                        <div className="pb-2 border-b border-border/50">
+                          <span className="block form-label">Local Mobile No</span>
+                          <span className="block body-text-primary mt-1">{student.local_mobile_no || "—"}</span>
+                        </div>
+                        <div className="pb-2 border-b border-border/50">
+                          <span className="block form-label">Parent Email</span>
+                          {student.parent_email ? (
+                            <a href={`mailto:${student.parent_email}`} className="inline-flex items-center gap-1.5 text-[15px] font-semibold text-primary mt-1 hover:underline">
+                              <Mail size={14} />
+                              <span>{student.parent_email}</span>
+                            </a>
+                          ) : (
+                            <span className="block body-text-secondary mt-1">—</span>
+                          )}
+                        </div>
+                        <div className="pb-2 border-b border-border/50">
+                          <span className="block form-label">Parent Emergency Contact</span>
+                          <span className="block body-text-primary mt-1">{student.parent_emergency_contact || "—"}</span>
+                        </div>
+                        <div className="pb-2 border-b border-border/50">
+                          <span className="block form-label">Alternative Contact</span>
+                          <span className="block body-text-primary mt-1">{student.alternative_contact || "—"}</span>
+                        </div>
                       </div>
                     </div>
-                  </SectionCard>
 
-                  {/* Contact & Address info combined */}
-                  <SectionCard title="Contact & Residency Credentials" description="Communication touchpoints for notifications, emergency contacts, and home town records.">
-                    <div className="flex flex-col gap-7">
+                    <div className="h-px bg-border/50" />
+
+                    <div>
+                      <h4 className="text-[13px] font-bold uppercase tracking-[0.08em] text-primary mb-3 flex items-center gap-2">
+                        <MapPin size={14} />
+                        <span>Permanent Address Registry</span>
+                      </h4>
+                      <div className="flex items-start gap-3 p-4 bg-secondary/10 border border-border/60 rounded-md">
+                        <MapPin size={18} className="text-primary mt-0.5 shrink-0" />
+                        <div className="flex flex-col">
+                          <span className="form-label">Street Location Address</span>
+                          <span className="body-text-primary mt-1 leading-relaxed">
+                            {student.address || "No address listed on student profile."}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </SectionCard>
+              </div>
+
+              {/* Right Column: Identity attachments & KYC verified flags */}
+              <div className="flex flex-col gap-6">
+
+                {/* Identity attachments display */}
+                <SectionCard title="Identity Details" description="Verified documentation credentials and file attachments.">
+                  <div className="flex flex-col gap-5">
+                    <div className="p-4 bg-secondary/10 border border-border/60 rounded-md flex items-center justify-between">
                       <div>
-                        <h4 className="text-[13px] font-bold uppercase tracking-[0.08em] text-primary mb-4 flex items-center gap-2">
-                          <Phone size={14} />
-                          <span>Contact Channels & Emergencies</span>
-                        </h4>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-5 gap-x-6">
-                          <div className="pb-2 border-b border-border/50">
-                            <span className="block text-xs font-bold text-muted-foreground uppercase tracking-wider">Student Email</span>
-                            {student.student_email ? (
-                              <a href={`mailto:${student.student_email}`} className="inline-flex items-center gap-1.5 text-[15px] font-semibold text-primary mt-1 hover:underline">
-                                <Mail size={14} />
-                                <span>{student.student_email}</span>
-                              </a>
-                            ) : (
-                              <span className="block text-[15px] font-semibold text-muted-foreground mt-1">—</span>
-                            )}
-                          </div>
-                          <div className="pb-2 border-b border-border/50">
-                            <span className="block text-xs font-bold text-muted-foreground uppercase tracking-wider">Student Mobile</span>
-                            <span className="block text-[15px] font-semibold text-foreground mt-1">{student.contact || "—"}</span>
-                          </div>
-                          <div className="pb-2 border-b border-border/50">
-                            <span className="block text-xs font-bold text-muted-foreground uppercase tracking-wider">Local Mobile No</span>
-                            <span className="block text-[15px] font-semibold text-foreground mt-1">{student.local_mobile_no || "—"}</span>
-                          </div>
-                          <div className="pb-2 border-b border-border/50">
-                            <span className="block text-xs font-bold text-muted-foreground uppercase tracking-wider">Parent Email</span>
-                            {student.parent_email ? (
-                              <a href={`mailto:${student.parent_email}`} className="inline-flex items-center gap-1.5 text-[15px] font-semibold text-primary mt-1 hover:underline">
-                                <Mail size={14} />
-                                <span>{student.parent_email}</span>
-                              </a>
-                            ) : (
-                              <span className="block text-[15px] font-semibold text-muted-foreground mt-1">—</span>
-                            )}
-                          </div>
-                          <div className="pb-2 border-b border-border/50">
-                            <span className="block text-xs font-bold text-muted-foreground uppercase tracking-wider">Parent Emergency Contact</span>
-                            <span className="block text-[15px] font-semibold text-foreground mt-1">{student.parent_emergency_contact || "—"}</span>
-                          </div>
-                          <div className="pb-2 border-b border-border/50">
-                            <span className="block text-xs font-bold text-muted-foreground uppercase tracking-wider">Alternative Contact</span>
-                            <span className="block text-[15px] font-semibold text-foreground mt-1">{student.alternative_contact || "—"}</span>
-                          </div>
+                        <span className="block form-label">Passport Number</span>
+                        <span className="block text-lg font-bold text-foreground mt-1 font-mono">
+                          {student.passport_no}
+                        </span>
+                      </div>
+                      <ShieldCheck size={24} className="text-primary opacity-80" />
+                    </div>
+
+                    {/* Files items */}
+                    <div className="flex flex-col gap-3">
+                      <FileAttachmentCard label="Resident Profile Photo" path={student.profile_pic} />
+                      <FileAttachmentCard label="Passport ID Scan (Page 1)" path={student.passport_image_1} />
+                      <FileAttachmentCard label="Passport Address Scan (Page 2)" path={student.passport_image_2} />
+                    </div>
+                  </div>
+                </SectionCard>
+
+                {/* KYC verified checkboxes indicators */}
+                <SectionCard title="KYC Verification Status" description="System verified checklist parameters and auditor review tags.">
+                  <div className="flex flex-col gap-5">
+
+                    {/* Grid of indicators */}
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 gap-3">
+                      <VerificationIndicator label="KYC Approved" isTrue={student.kyc_verified} />
+                      <VerificationIndicator label="Passport No" isTrue={student.passport_no_reviewed} />
+                      <VerificationIndicator label="Passport Copy" isTrue={student.passport_copy_reviewed} />
+                      <VerificationIndicator label="Profile Pic" isTrue={student.profile_picture_reviewed} />
+                      <VerificationIndicator label="Mobile Verified" isTrue={student.student_mobile_verified} />
+                      <VerificationIndicator label="Email Verified" isTrue={student.student_email_verified} />
+                      <VerificationIndicator label="Parent Phone" isTrue={student.parent_mobile_verified} />
+                      <VerificationIndicator label="Parent Email" isTrue={student.parent_email_verified} />
+                      <VerificationIndicator label="Local Home" isTrue={student.home_town} />
+                      <VerificationIndicator label="Notifs Active" isTrue={!student.no_notification} />
+                    </div>
+
+                    {/* Review details */}
+                    <div className="p-4 bg-secondary/15 rounded-md border border-border/60 text-[13px] flex flex-col gap-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs">
+                          {(student.reviewed_by || "SA").substring(0, 2).toUpperCase()}
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-xs text-muted-foreground">Audited By</span>
+                          <span className="font-semibold text-foreground">{student.reviewed_by || "System Auditor"}</span>
                         </div>
                       </div>
 
                       <div className="h-px bg-border/50" />
 
-                      <div>
-                        <h4 className="text-[13px] font-bold uppercase tracking-[0.08em] text-primary mb-3 flex items-center gap-2">
-                          <MapPin size={14} />
-                          <span>Permanent Address Registry</span>
-                        </h4>
-                        <div className="flex items-start gap-3 p-4 bg-secondary/10 border border-border/60 rounded-md">
-                          <MapPin size={18} className="text-primary mt-0.5 shrink-0" />
-                          <div className="flex flex-col">
-                            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Street Location Address</span>
-                            <span className="text-[15px] font-semibold text-foreground mt-1 leading-relaxed">
-                              {student.address || "No address listed on student profile."}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </SectionCard>
-                </div>
-
-                {/* Right Column: Identity attachments & KYC verified flags */}
-                <div className="flex flex-col gap-6">
-                  
-                  {/* Identity attachments display */}
-                  <SectionCard title="Identity Details" description="Verified documentation credentials and file attachments.">
-                    <div className="flex flex-col gap-5">
-                      <div className="p-4 bg-secondary/10 border border-border/60 rounded-md flex items-center justify-between">
+                      <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <span className="block text-xs font-bold text-muted-foreground uppercase tracking-wider">Passport Number</span>
-                          <span className="block text-lg font-bold text-foreground mt-1 font-mono">
-                            {student.passport_no}
+                          <span className="block text-xs text-muted-foreground">Audited On</span>
+                          <span className="block font-semibold text-foreground mt-0.5">
+                            {student.reviewed_on ? new Date(student.reviewed_on).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : student.updated_at ? new Date(student.updated_at).toLocaleDateString() : "-"}
                           </span>
                         </div>
-                        <ShieldCheck size={24} className="text-primary opacity-80" />
-                      </div>
-                      
-                      {/* Files items */}
-                      <div className="flex flex-col gap-3">
-                        <FileAttachmentCard label="Resident Profile Photo" path={student.profile_pic} />
-                        <FileAttachmentCard label="Passport ID Scan (Page 1)" path={student.passport_image_1} />
-                        <FileAttachmentCard label="Passport Address Scan (Page 2)" path={student.passport_image_2} />
-                      </div>
-                    </div>
-                  </SectionCard>
-
-                  {/* KYC verified checkboxes indicators */}
-                  <SectionCard title="KYC Verification Status" description="System verified checklist parameters and auditor review tags.">
-                    <div className="flex flex-col gap-5">
-                      
-                      {/* Grid of indicators */}
-                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 gap-3">
-                        <VerificationIndicator label="KYC Approved" isTrue={student.kyc_verified} />
-                        <VerificationIndicator label="Passport No" isTrue={student.passport_no_reviewed} />
-                        <VerificationIndicator label="Passport Copy" isTrue={student.passport_copy_reviewed} />
-                        <VerificationIndicator label="Profile Pic" isTrue={student.profile_picture_reviewed} />
-                        <VerificationIndicator label="Mobile Verified" isTrue={student.student_mobile_verified} />
-                        <VerificationIndicator label="Email Verified" isTrue={student.student_email_verified} />
-                        <VerificationIndicator label="Parent Phone" isTrue={student.parent_mobile_verified} />
-                        <VerificationIndicator label="Parent Email" isTrue={student.parent_email_verified} />
-                        <VerificationIndicator label="Local Home" isTrue={student.home_town} />
-                        <VerificationIndicator label="Notifs Active" isTrue={!student.no_notification} />
-                      </div>
-
-                      {/* Review details */}
-                      <div className="p-4 bg-secondary/15 rounded-md border border-border/60 text-[13px] flex flex-col gap-3">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs">
-                            {(student.reviewed_by || "SA").substring(0, 2).toUpperCase()}
-                          </div>
-                          <div className="flex flex-col">
-                            <span className="text-xs text-muted-foreground">Audited By</span>
-                            <span className="font-semibold text-foreground">{student.reviewed_by || "System Auditor"}</span>
-                          </div>
-                        </div>
-                        
-                        <div className="h-px bg-border/50" />
-
-                        <div className="grid grid-cols-2 gap-3">
+                        {student.arrival_datetime && (
                           <div>
-                            <span className="block text-xs text-muted-foreground">Audited On</span>
+                            <span className="block text-xs text-muted-foreground">Arrival Scheduled</span>
                             <span className="block font-semibold text-foreground mt-0.5">
-                              {student.reviewed_on ? new Date(student.reviewed_on).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : student.updated_at ? new Date(student.updated_at).toLocaleDateString() : "-"}
+                              {new Date(student.arrival_datetime).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
                             </span>
                           </div>
-                          {student.arrival_datetime && (
-                            <div>
-                              <span className="block text-xs text-muted-foreground">Arrival Scheduled</span>
-                              <span className="block font-semibold text-foreground mt-0.5">
-                                {new Date(student.arrival_datetime).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
-                              </span>
-                            </div>
-                          )}
-                        </div>
+                        )}
                       </div>
-
                     </div>
-                  </SectionCard>
-                </div>
 
+                  </div>
+                </SectionCard>
               </div>
-            )}
+
+            </div>
+          )}
 
         </div>
       )}

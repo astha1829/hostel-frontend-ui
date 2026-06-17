@@ -14,11 +14,15 @@ import { ErrorState } from "@/components/ui/error-state";
 import { useRoomDetails } from "../hooks/use-room-details";
 import { showCancelConfirm } from "@/utils/swal";
 
+import { useRouter } from "next/navigation";
+
 interface RoomDetailsPageProps {
   id: string;
+  initialEditMode?: boolean;
 }
 
-export const RoomDetailsPage: React.FC<RoomDetailsPageProps> = ({ id }) => {
+export const RoomDetailsPage: React.FC<RoomDetailsPageProps> = ({ id, initialEditMode = false }) => {
+  const router = useRouter();
   const {
     room,
     isLoading,
@@ -32,10 +36,10 @@ export const RoomDetailsPage: React.FC<RoomDetailsPageProps> = ({ id }) => {
     handleInputChange,
     saveChanges,
     reload,
-  } = useRoomDetails(id);
+  } = useRoomDetails(id, initialEditMode);
 
   const [copied, setCopied] = React.useState(false);
-  
+
   // Check if form data has unsaved edits
   const isDirty = React.useMemo(() => {
     if (!room) return false;
@@ -84,6 +88,27 @@ export const RoomDetailsPage: React.FC<RoomDetailsPageProps> = ({ id }) => {
   }
 
   if (error || !room) {
+    const isNotFound = error?.toLowerCase().includes("404") || error?.toLowerCase().includes("not found");
+    if (isNotFound || !room) {
+      return (
+        <div className="flex flex-col items-center justify-center p-12 text-center border border-border rounded-xl bg-card max-w-lg mx-auto my-8 shadow-sm">
+          <div className="flex items-center justify-center w-16 h-16 rounded-full bg-secondary/20 mb-5 text-muted-foreground">
+            <Info size={36} />
+          </div>
+          <h3 className="text-xl font-bold text-foreground">Room Not Found</h3>
+          <p className="text-sm text-muted-foreground mt-2 leading-relaxed">The requested room record does not exist.</p>
+          <Button
+            variant="primary"
+            size="md"
+            onClick={() => router.push('/rooms')}
+            className="mt-6 flex items-center gap-2"
+          >
+            <span>Back to Rooms</span>
+          </Button>
+        </div>
+      );
+    }
+
     return (
       <ErrorState
         title="Failed to Retrieve Room Details"
@@ -126,7 +151,7 @@ export const RoomDetailsPage: React.FC<RoomDetailsPageProps> = ({ id }) => {
             <X size={16} />
             <span>Cancel</span>
           </Button>
-          <Button variant="primary" size="md" onClick={saveChanges} isLoading={isSaving}>
+          <Button className="btn-top-action">
             <Save size={16} />
             <span>Save Changes</span>
           </Button>
@@ -136,7 +161,7 @@ export const RoomDetailsPage: React.FC<RoomDetailsPageProps> = ({ id }) => {
           <Button variant="outline" size="md" onClick={reload} className="px-2" title="Reload details">
             <RefreshCw size={16} />
           </Button>
-          <Button variant="primary" size="md" onClick={toggleEditMode}>
+          <Button className="btn-top-action">
             <Edit2 size={16} />
             <span>Edit Details</span>
           </Button>
@@ -246,7 +271,7 @@ export const RoomDetailsPage: React.FC<RoomDetailsPageProps> = ({ id }) => {
 
       {/* Main Grid: Responsive 2 Columns */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch animate-in slide-in-from-bottom-4 duration-500">
-        
+
         {/* Left Column: Specifications Card */}
         <div className="lg:col-span-8 flex flex-col gap-4 h-full">
           <SectionCard
@@ -337,7 +362,7 @@ export const RoomDetailsPage: React.FC<RoomDetailsPageProps> = ({ id }) => {
                       disabled={isSaving}
                     />
                   </div>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-2">
                     <Input
                       label="Rent Rate ($ / Month) *"
@@ -367,7 +392,7 @@ export const RoomDetailsPage: React.FC<RoomDetailsPageProps> = ({ id }) => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3">
                 <div className="flex flex-col gap-1 sm:col-span-2">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Associated Hostel</span>
-                  <span className="text-[15px] font-bold text-foreground">
+                  <span className="body-text-primary">
                     {room.hostel?.hostel_name || "-"}
                   </span>
                 </div>
@@ -430,10 +455,10 @@ export const RoomDetailsPage: React.FC<RoomDetailsPageProps> = ({ id }) => {
             className="h-full"
           >
             <div className="flex flex-col gap-3 items-center justify-center h-full">
-              
+
               {/* Premium Room Key Card Graphic */}
               <div className="w-full max-w-[420px] bg-gradient-to-br from-primary to-primary/75 rounded-[12px] p-5 text-white shadow-[0_10px_25px_-5px_hsl(var(--primary)/0.35),var(--shadow-md)] flex flex-col justify-between h-[180px] relative overflow-hidden border border-white/10 shrink-0">
-                
+
                 {/* Decorative translucent vector shapes */}
                 <div className="absolute -right-5 -top-5 w-[140px] h-[140px] rounded-full bg-white/10 pointer-events-none" />
                 <div className="absolute -left-10 -bottom-10 w-[180px] h-[180px] rounded-full bg-white/5 pointer-events-none" />
@@ -461,7 +486,7 @@ export const RoomDetailsPage: React.FC<RoomDetailsPageProps> = ({ id }) => {
                       Floor {room.floor?.floor_no || 1} • {room.capacity} Beds
                     </div>
                   </div>
-                  
+
                   {/* Premium Gold Microchip Graphic */}
                   <div className="w-[36px] h-[28px] bg-[linear-gradient(135deg,#e6b800_0%,#ffd700_45%,#fff5cc_70%,#d4af37_100%)] rounded-[4px] relative border border-black/15 overflow-hidden flex flex-wrap p-[1px] shadow-[0_2px_4px_rgba(0,0,0,0.1)] shrink-0">
                     <div className="w-1/2 h-1/2 border-r border-b border-black/15" />
@@ -486,13 +511,13 @@ export const RoomDetailsPage: React.FC<RoomDetailsPageProps> = ({ id }) => {
               <div className="w-full flex flex-col gap-3 mt-1 items-center">
                 <div className="bg-white p-1.5 rounded-md border border-border shadow-sm shrink-0">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img 
-                    src={qrCodeSource} 
-                    alt="Room QR Code" 
-                    className="w-[100px] h-[100px] block" 
+                  <img
+                    src={qrCodeSource}
+                    alt="Room QR Code"
+                    className="w-[100px] h-[100px] block"
                   />
                 </div>
-                
+
                 {/* Actions Row */}
                 <div className="flex flex-col gap-2 w-full max-w-[240px]">
                   <Button variant="outline" size="sm" onClick={handleCopy} className="flex gap-2 items-center w-full justify-center">

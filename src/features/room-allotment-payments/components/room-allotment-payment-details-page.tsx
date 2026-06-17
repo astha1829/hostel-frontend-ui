@@ -97,7 +97,7 @@ export const RoomAllotmentPaymentDetailsPage: React.FC<RoomAllotmentPaymentDetai
     : ["Unlinked Student", ""];
 
   return (
-    <div className="flex flex-col gap-6 animate-in slide-in-from-bottom-4 duration-500">
+    <div className="container-page flex flex-col gap-6 animate-in slide-in-from-bottom-4 duration-500">
       {/* Page Header Actions / Back Nav */}
       <PageHeader
         title={payment.room_allotment_name || "Payment Record"}

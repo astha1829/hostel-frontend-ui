@@ -1,21 +1,22 @@
 import React from "react";
 import { RoomAllotmentPaymentFormPage } from "@/features/room-allotment-payments/components/room-allotment-payment-form-page";
 
-interface EditRoomAllotmentPaymentPageProps {
+interface EditPaymentPageProps {
   params: Promise<{
     id: string;
   }>;
 }
 
-export async function generateMetadata({ params }: EditRoomAllotmentPaymentPageProps) {
+export async function generateMetadata({ params }: EditPaymentPageProps) {
   const resolvedParams = await params;
+  const id = resolvedParams?.id || "";
   return {
-    title: `Edit Payment ${resolvedParams.id.substring(0, 8).toUpperCase()} | ATMIA`,
+    title: `Edit Payment ${id ? id.substring(0, 8).toUpperCase() : ""} | ATMIA`,
     description: "Modify room allotment payment details and monthly linkages.",
   };
 }
 
-export default async function EditRoomAllotmentPaymentPage({ params }: EditRoomAllotmentPaymentPageProps) {
+export default async function EditPaymentPage({ params }: EditPaymentPageProps) {
   const resolvedParams = await params;
   return <RoomAllotmentPaymentFormPage id={resolvedParams.id} />;
 }

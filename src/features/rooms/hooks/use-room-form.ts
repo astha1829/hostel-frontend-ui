@@ -4,7 +4,7 @@ import { HostelApi } from "../../hostels/api";
 import { Hostel } from "../../hostels/types";
 import { HostelFloor } from "../../hostel-floors/types";
 import { CreateHostelRoomPayload } from "../types";
-import { showSuccess, showError, showLoading, closeLoading } from "@/utils/swal";
+import { showDeleteSuccess, showDeleteError, showLoading, closeLoading, showSuccess, showError } from '@/utils/swal';
 
 interface RoomFormErrors {
   hostel_id?: string;
@@ -18,7 +18,7 @@ interface RoomFormErrors {
   qr_code?: string;
 }
 
-export const useRoomForm = (onSuccess?: () => void) => {
+export const useRoomForm = (onSuccess?: () => void, initialHostelId?: string, initialFloorId?: string) => {
   const [hostels, setHostels] = useState<Hostel[]>([]);
   const [floors, setFloors] = useState<HostelFloor[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -26,8 +26,8 @@ export const useRoomForm = (onSuccess?: () => void) => {
   const [error, setError] = useState<string | null>(null);
 
   // Form Field States
-  const [hostelId, setHostelId] = useState("");
-  const [floorId, setFloorId] = useState("");
+  const [hostelId, setHostelId] = useState(initialHostelId || "");
+  const [floorId, setFloorId] = useState(initialFloorId || "");
   const [roomNo, setRoomNo] = useState("");
   const [capacity, setCapacity] = useState<number>(2);
   const [roomType, setRoomType] = useState("Normal");

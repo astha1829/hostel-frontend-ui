@@ -7,7 +7,7 @@ import {
   RoomAllotmentSummary,
   RoomAllotmentPaymentSummary,
 } from "../types";
-import { showSuccess, showError, showLoading, closeLoading } from "@/utils/swal";
+import { showDeleteSuccess, showDeleteError, showLoading, closeLoading, showSuccess, showError } from '@/utils/swal';
 
 const initialFormState: CreateHostelContractEventPayload = {
   student_id: "",

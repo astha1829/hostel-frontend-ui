@@ -3,7 +3,7 @@ import { http } from "@/lib/http";
 import { PaginatedResponse } from "@/types/api";
 import { Hostel, HostelStatus, HostelFloor } from "../types";
 import { HostelApi } from "../api";
-import { showDeleteConfirm, showSuccess, showError, showLoading, closeLoading } from "@/utils/swal";
+import { showDeleteConfirm, showDeleteSuccess, showDeleteError, showLoading, closeLoading } from "@/utils/swal";
 
 export function useHostels() {
   const [hostels, setHostels] = useState<Hostel[]>([]);
@@ -127,19 +127,19 @@ export function useHostels() {
   }, [fetchHostels, fetchStats]);
 
   const handleDelete = async (id: string) => {
-    const result = await showDeleteConfirm("This will delete all associated floors and rooms.");
+    const result = await showDeleteConfirm();
     if (!result.isConfirmed) return;
 
     showLoading("Deleting...", "Please wait");
     try {
       await HostelApi.deleteHostel(id);
       closeLoading();
-      await showSuccess("Deleted Successfully", "Record has been removed successfully.");
+      await showDeleteSuccess();
       fetchHostels();
       fetchStats();
     } catch (err: any) {
       closeLoading();
-      showError("Delete Failed", err.message || "Failed to delete hostel.");
+      await showDeleteError();
     }
   };
 

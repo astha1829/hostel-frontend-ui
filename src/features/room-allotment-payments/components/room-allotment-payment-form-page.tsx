@@ -1,16 +1,9 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, Save, X, Calendar, DollarSign, ListFilter, Plus, Info } from "lucide-react";
-import { PageHeader } from "@/components/ui/page-header";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { TableSkeleton } from "@/components/ui/loading-skeleton";
+import { X, Save, FileText } from "lucide-react";
 import { useRoomAllotmentPaymentForm } from "../hooks/use-room-allotment-payment-form";
-import { TableContainer, Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { showCancelConfirm } from "@/utils/swal";
 
 interface RoomAllotmentPaymentFormPageProps {
@@ -21,7 +14,11 @@ export const RoomAllotmentPaymentFormPage: React.FC<RoomAllotmentPaymentFormPage
   const router = useRouter();
 
   const handleSuccess = (paymentId: string) => {
-    router.push(`/room-allotment-payments/${paymentId}`);
+    if (id) {
+      router.push("/room-allotment-payments");
+    } else {
+      router.push(`/room-allotment-payments/${paymentId}`);
+    }
   };
 
   const handleCancel = () => {
@@ -34,11 +31,9 @@ export const RoomAllotmentPaymentFormPage: React.FC<RoomAllotmentPaymentFormPage
 
   const {
     formData,
+    originalPayment,
     students,
     allotments,
-    contractEvents,
-    availableRentPayments,
-    isLoadingMetadata,
     isLoadingDetails,
     isSubmitting,
     fieldErrors,
@@ -46,8 +41,6 @@ export const RoomAllotmentPaymentFormPage: React.FC<RoomAllotmentPaymentFormPage
     handleStudentChange,
     handleRoomAllotmentChange,
     handleInputChange,
-    handleToggleMonth,
-    handleMonthPenaltyChange,
     handleSubmit,
   } = useRoomAllotmentPaymentForm({
     id,
@@ -64,43 +57,52 @@ export const RoomAllotmentPaymentFormPage: React.FC<RoomAllotmentPaymentFormPage
     handleCancel();
   };
 
+  // Derive dynamic values for the UI
+  const student = students.find((s) => s.id === formData.student_id);
+  const studentName = student ? `${student.student_name} ${student.last_name || ""}`.trim() : "Student Name";
+  const initials = studentName.substring(0, 2).toUpperCase() || "SC";
+  
+  const allotment = allotments.find((a) => a.id === formData.room_allotment_id);
+  const hostelName = allotment?.hostel_name || originalPayment?.hostel_name || "Atmia Alphabet Girl Hostel";
+  const roomDetails = allotment ? `Room ${allotment.room_no}, Floor ${allotment.floor_no || 1}` : "Room 105, Floor 1";
+  const contractNo = originalPayment?.hostel_contract_id ? `#${originalPayment.hostel_contract_id.toString().substring(0, 3)}` : "#106";
+
+  const paymentIdDisplay = id ? `#${id.substring(0, 8).toUpperCase()}` : "#NEW";
+  
+  const formatDate = (dateString?: string, defaultStr = "Jun 04, 2026") => {
+    if (!dateString) return defaultStr;
+    try {
+      const d = new Date(dateString);
+      return d.toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" });
+    } catch {
+      return defaultStr;
+    }
+  };
+
+  const formatDateTime = (dateString?: string, defaultStr = "Jun 04, 2026 09:18 AM") => {
+    if (!dateString) return defaultStr;
+    try {
+      const d = new Date(dateString);
+      return d.toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
+    } catch {
+      return defaultStr;
+    }
+  };
+
+  const createdOn = formatDate(originalPayment?.created_at, "Jun 04, 2026");
+  const createdOnTime = formatDateTime(originalPayment?.created_at, "Jun 04, 2026 09:18 AM");
+  const updatedOnTime = formatDateTime(originalPayment?.updated_at, "Jun 15, 2026 10:42 AM");
+  const linkedMonthsCount = formData.months?.length || 0;
+
+  const statusColor = formData.payment_status === "Paid" ? "#22C55E" : formData.payment_status === "Pending" ? "#F59E0B" : "#EF4444";
+
   if (isLoadingDetails) {
     return (
-      <div className="flex flex-col gap-6 max-w-[1400px] mx-auto w-full">
-        <PageHeader
-          title={id ? "Edit Payment Record" : "New Payment Record"}
-          description="Fetching payment parameters from ledger..."
-        />
-        <TableSkeleton rows={8} />
+      <div className="flex flex-col items-center justify-center py-20 text-center">
+        <p className="text-muted-foreground mt-2">Loading payment details...</p>
       </div>
     );
   }
-
-  const studentOptions = [
-    { label: "Select Student...", value: "" },
-    ...students.map((s) => ({
-      label: `${s.student_name} ${s.last_name || ""}`.trim(),
-      value: s.id,
-    })),
-  ];
-
-  const allotmentOptions = [
-    { label: "Select Room Allotment...", value: "" },
-    ...allotments.map((a) => ({
-      label: a.hostel_name 
-        ? `${a.hostel_name} - Room ${a.room_no}` 
-        : `Room ${a.room_no} (${a.student_name || "Allotment"})`,
-      value: a.id,
-    })),
-  ];
-
-  const contractEventOptions = [
-    { label: "Select Associated Event (Optional)...", value: "" },
-    ...contractEvents.map((e) => ({
-      label: e.event_no ? `${e.event_no} - ${e.action_type}` : `Event-${e.id.substring(0, 8)} (${e.action_type})`,
-      value: e.id,
-    })),
-  ];
 
   const transactionTypeOptions = [
     { label: "Rent Payment", value: "Rent Payment" },
@@ -117,361 +119,315 @@ export const RoomAllotmentPaymentFormPage: React.FC<RoomAllotmentPaymentFormPage
     { label: "Failed", value: "Failed" },
   ];
 
-  const cardClass = "border border-gray-200 bg-card rounded-[16px] shadow-sm";
-  const cardHeaderClass = "border-b border-gray-200 p-6";
-  const cardTitleClass = "text-[20px] font-semibold text-foreground";
-  const cardContentClass = "p-6 pt-6";
-  const labelClass = "block text-[12px] uppercase tracking-wide font-semibold text-muted-foreground mb-1.5";
-  const helperClass = "block text-[12px] text-gray-500 mt-1.5";
+  const studentOptions = [
+    { label: "Select Student...", value: "" },
+    ...students.map((s) => ({
+      label: `${s.student_name} ${s.last_name || ""}`.trim().toUpperCase(),
+      value: s.id,
+    })),
+  ];
+
+  const allotmentOptions = [
+    { label: "Select Room Allotment...", value: "" },
+    ...allotments.map((a) => ({
+      label: `${a.hostel_name || "Hostel"} - Room ${a.room_no}`,
+      value: a.id,
+    })),
+  ];
+
+  // Common styles
+  const cardStyle = {
+    backgroundColor: "#FFFFFF",
+    borderRadius: "18px",
+    border: "1px solid #E5E7EB",
+    boxShadow: "0 4px 20px rgba(15,23,42,0.04)",
+  };
+
+  const inputStyle = {
+    height: "48px",
+    borderRadius: "12px",
+    border: "1px solid #DCE3EE",
+    backgroundColor: "#FFFFFF",
+    padding: "0 16px",
+    fontSize: "16px",
+    fontWeight: "500",
+    color: "#0F172A",
+    width: "100%",
+    outline: "none",
+    transition: "border-color 0.2s",
+  };
+
+  const labelStyle = {
+    display: "block",
+    fontSize: "14px",
+    fontWeight: "600",
+    color: "#334155",
+    letterSpacing: "0.01em",
+    marginBottom: "8px",
+  };
 
   return (
-    <div className="flex flex-col gap-6 animate-in slide-in-from-bottom-4 duration-500 max-w-[1400px] mx-auto w-full">
-      <PageHeader
-        title={id ? "Edit Room Allotment Payment" : "New Room Allotment Payment"}
-        description={id ? "Modify financial ledger details or link references." : "Register a new room allotment payment, link billing months, and book penalties."}
-        backHref={id ? `/room-allotment-payments/${id}` : "/room-allotment-payments"}
-        backText={id ? "Payment Details" : "Room Allotment Payments"}
-      />
-
-      {apiError && (
-        <div className="px-5 py-4 bg-destructive/10 border border-destructive/20 rounded-md text-destructive text-sm font-medium">
-          {apiError}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="flex flex-col gap-6 pb-12">
+    <div style={{ backgroundColor: "#F8FAFC", minHeight: "100vh", fontFamily: "'Inter', ui-sans-serif, system-ui, sans-serif" }}>
+      <div className="w-full max-w-none px-6 lg:px-8 py-6">
         
-        {/* CARD 1: Payment Information */}
-        <Card className={cardClass}>
-          <CardHeader className={cardHeaderClass}>
-            <CardTitle className={cardTitleClass}>Payment Information</CardTitle>
-          </CardHeader>
-          <CardContent className={cardContentClass}>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
+        {/* TOP HEADER */}
+        <div style={{ marginBottom: "24px" }}>
+          <button 
+            onClick={handleCancelClick}
+            style={{ color: "#64748B", fontSize: "14px", fontWeight: "500", display: "flex", alignItems: "center", gap: "6px", background: "none", border: "none", cursor: "pointer", padding: "0", marginBottom: "16px" }}
+          >
+            <span style={{ fontSize: "16px" }}>←</span> Back to Payments
+          </button>
+          
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+            <div>
+              <h1 style={{ fontSize: "48px", fontWeight: "800", color: "#0F172A", margin: "0 0 8px 0", letterSpacing: "-0.02em" }}>
+                Edit Room Allotment Payment
+              </h1>
+              <p style={{ fontSize: "15px", color: "#475569", lineHeight: "1.6", margin: "0" }}>
+                Update payment details and financial information.
+              </p>
+            </div>
+            
+            <div style={{ display: "flex", gap: "12px" }}>
+              <button 
+                onClick={handleCancelClick}
+                disabled={isSubmitting}
+                style={{ height: "48px", borderRadius: "12px", border: "1px solid #E5E7EB", backgroundColor: "#FFFFFF", color: "#0F172A", fontWeight: "600", fontSize: "14px", display: "flex", alignItems: "center", gap: "8px", padding: "0 20px", cursor: "pointer" }}
+              >
+                <X size={16} /> Cancel
+              </button>
+              <button 
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+                style={{ height: "48px", borderRadius: "12px", border: "none", backgroundColor: "#5B3DF5", color: "#FFFFFF", fontWeight: "600", fontSize: "14px", display: "flex", alignItems: "center", gap: "8px", padding: "0 20px", cursor: "pointer" }}
+              >
+                <Save size={16} /> {isSubmitting ? "Saving..." : "Save Payment Record"}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {apiError && id ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center bg-white border border-gray-200 rounded-[18px] shadow-sm mb-6">
+            <h2 className="text-2xl font-bold text-slate-900">Payment not found</h2>
+            <p className="text-slate-500 mt-2 max-w-md">The payment record you are looking for does not exist or has been deleted. It may have been an invalid ID.</p>
+            <button 
+              onClick={() => router.push("/room-allotment-payments")} 
+              style={{ height: "48px", borderRadius: "12px", border: "1px solid #E5E7EB", backgroundColor: "#FFFFFF", color: "#0F172A", fontWeight: "600", fontSize: "14px", display: "flex", alignItems: "center", gap: "8px", padding: "0 20px", cursor: "pointer", marginTop: "24px" }}
+            >
+              <span style={{ fontSize: "16px" }}>←</span> Back to Payments
+            </button>
+          </div>
+        ) : apiError ? (
+          <div className="px-5 py-4 bg-red-50 border border-red-200 rounded-[12px] text-red-600 text-sm font-medium mb-6">
+            {apiError}
+          </div>
+        ) : null}
+
+        {(!apiError || !id) && (
+          <>
+            {/* PAYMENT OVERVIEW CARD */}
+            <div style={{ ...cardStyle, height: "120px", marginBottom: "24px", display: "flex", alignItems: "center" }}>
               
-              {/* Student Selection */}
-              <div>
-                <label className={labelClass}>Student *</label>
-                <Select
-                  value={formData.student_id}
-                  onChange={(e) => handleStudentChange(e.target.value)}
-                  options={studentOptions}
-                  disabled={isLoadingMetadata || !!id}
-                  className={`text-[14px] h-10 ${fieldErrors.student_id ? "border-destructive" : "border-gray-200"}`}
-                />
-                {fieldErrors.student_id && <span className="text-[12px] text-destructive mt-1.5 block">{fieldErrors.student_id}</span>}
+              {/* Col 1 */}
+              <div style={{ flex: 1, padding: "0 24px", display: "flex", alignItems: "center", gap: "16px", borderRight: "1px solid #E5E7EB", height: "72px" }}>
+                <div style={{ width: "48px", height: "48px", borderRadius: "50%", backgroundColor: "#F3F0FF", color: "#5B3DF5", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "700", fontSize: "16px" }}>
+                  {initials}
+                </div>
+                <div>
+                  <div style={{ fontSize: "14px", fontWeight: "500", color: "#64748B", marginBottom: "2px" }}>Student</div>
+                  <div style={{ fontSize: "18px", fontWeight: "700", color: "#0F172A" }}>{studentName}</div>
+                  <div style={{ fontSize: "14px", fontWeight: "500", color: "#64748B", marginTop: "2px" }}>Contract: {contractNo}</div>
+                </div>
               </div>
 
-              {/* Room Allotment Selection */}
-              <div>
-                <label className={labelClass}>Room Allotment *</label>
-                <Select
-                  value={formData.room_allotment_id}
-                  onChange={(e) => handleRoomAllotmentChange(e.target.value)}
-                  options={allotmentOptions}
-                  disabled={!formData.student_id || !!id}
-                  className={`text-[14px] h-10 ${fieldErrors.room_allotment_id ? "border-destructive" : "border-gray-200"}`}
-                />
-                {!formData.student_id && (
-                  <span className={helperClass}>Select a student first to see room allotments.</span>
-                )}
-                {fieldErrors.room_allotment_id && <span className="text-[12px] text-destructive mt-1.5 block">{fieldErrors.room_allotment_id}</span>}
+              {/* Col 2 */}
+              <div style={{ flex: 1, padding: "0 24px", borderRight: "1px solid #E5E7EB", height: "72px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+                <div style={{ fontSize: "14px", fontWeight: "500", color: "#64748B", marginBottom: "2px" }}>Allotment</div>
+                <div style={{ fontSize: "18px", fontWeight: "700", color: "#0F172A" }}>{roomDetails}</div>
+                <div style={{ fontSize: "14px", fontWeight: "500", color: "#64748B", marginTop: "2px" }}>{hostelName}</div>
               </div>
 
-              {/* Transaction Type */}
-              <div>
-                <label className={labelClass}>Transaction Type *</label>
-                <Select
-                  value={formData.transaction_type}
-                  onChange={(e) => handleInputChange("transaction_type", e.target.value)}
-                  options={transactionTypeOptions}
-                  className={`text-[14px] h-10 ${fieldErrors.transaction_type ? "border-destructive" : "border-gray-200"}`}
-                />
-                {fieldErrors.transaction_type && <span className="text-[12px] text-destructive mt-1.5 block">{fieldErrors.transaction_type}</span>}
+              {/* Col 3 */}
+              <div style={{ flex: 1, padding: "0 24px", borderRight: "1px solid #E5E7EB", height: "72px", display: "flex", alignItems: "center", gap: "12px" }}>
+                <div style={{ width: "36px", height: "36px", borderRadius: "8px", backgroundColor: "#EFF6FF", color: "#3B82F6", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <FileText size={18} />
+                </div>
+                <div>
+                  <div style={{ fontSize: "14px", fontWeight: "500", color: "#64748B", marginBottom: "2px" }}>Transaction Type</div>
+                  <div style={{ fontSize: "18px", fontWeight: "700", color: "#0F172A" }}>{formData.transaction_type}</div>
+                </div>
               </div>
 
-              {/* Payment Status */}
-              <div>
-                <label className={labelClass}>Payment Status *</label>
-                <Select
-                  value={formData.payment_status}
-                  onChange={(e) => handleInputChange("payment_status", e.target.value)}
-                  options={statusOptions}
-                  className="text-[14px] h-10 border-gray-200"
-                />
+              {/* Col 4 */}
+              <div style={{ flex: 1, padding: "0 24px", borderRight: "1px solid #E5E7EB", height: "72px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+                <div style={{ fontSize: "14px", fontWeight: "500", color: "#64748B", marginBottom: "4px" }}>Payment Status</div>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "18px", fontWeight: "700", color: "#0F172A" }}>
+                  <div style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: statusColor }}></div>
+                  {formData.payment_status}
+                </div>
+                <div style={{ fontSize: "14px", fontWeight: "500", color: "#64748B", marginTop: "2px" }}>Linked Months: {linkedMonthsCount}</div>
               </div>
 
-              {/* Posting Datetime */}
-              <div>
-                <label className={labelClass}>Posting Date/Time</label>
-                <Input
-                  type="datetime-local"
-                  value={formData.posting_datetime || ""}
-                  onChange={(e) => handleInputChange("posting_datetime", e.target.value)}
-                  className="text-[14px] h-10 border-gray-200"
-                />
-                <span className={helperClass}>Defaults to the current time if left empty.</span>
+              {/* Col 5 */}
+              <div style={{ flex: 1, padding: "0 24px", height: "72px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+                <div style={{ fontSize: "14px", fontWeight: "500", color: "#64748B", marginBottom: "2px" }}>Payment ID</div>
+                <div style={{ fontSize: "18px", fontWeight: "700", color: "#0F172A" }}>{paymentIdDisplay}</div>
+                <div style={{ fontSize: "14px", fontWeight: "500", color: "#64748B", marginTop: "2px" }}>Created on {createdOn}</div>
               </div>
 
             </div>
-          </CardContent>
-        </Card>
 
-        {/* CARD 2: Linked Rent Payments (Billing Months) */}
-        {formData.student_id && formData.room_allotment_id && (
-          <Card className={cardClass}>
-            <CardHeader className={cardHeaderClass}>
-              <CardTitle className={cardTitleClass}>Link Billing Months</CardTitle>
-            </CardHeader>
-            <CardContent className={cardContentClass}>
-              {availableRentPayments.length === 0 ? (
-                <div className="flex flex-col items-center justify-center min-h-[120px] max-h-[140px] text-center border border-dashed border-gray-200 rounded-xl bg-gray-50/50">
-                  <Info size={24} className="text-gray-400 mb-2 mx-auto" />
-                  <p className="font-medium text-[14px] text-gray-700 m-0">No unlinked rent payments found for this allotment.</p>
-                  <p className="text-[12px] text-gray-500 mt-1 m-0">All rent records are either linked to other payments, or none have been logged.</p>
+            {/* MAIN FORM */}
+            <div className="w-full flex flex-col">
+              
+              {/* Section 1: Payment Information */}
+              <div>
+                <h2 style={{ fontSize: "28px", fontWeight: "700", color: "#0F172A", marginBottom: "16px" }}>Payment Information</h2>
+                
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "16px", marginBottom: "16px" }}>
+                  <div>
+                    <label style={labelStyle}>Student <span style={{color:"#EF4444"}}>*</span></label>
+                    <select 
+                      value={formData.student_id}
+                      onChange={(e) => handleStudentChange(e.target.value)}
+                      style={{...inputStyle, appearance: "none", backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%2364748B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>')`, backgroundRepeat: "no-repeat", backgroundPosition: "right 16px center", borderColor: fieldErrors.student_id ? "#EF4444" : "#DCE3EE"}}
+                    >
+                      {studentOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label style={labelStyle}>Room Allotment <span style={{color:"#EF4444"}}>*</span></label>
+                    <select 
+                      value={formData.room_allotment_id}
+                      onChange={(e) => handleRoomAllotmentChange(e.target.value)}
+                      style={{...inputStyle, appearance: "none", backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%2364748B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>')`, backgroundRepeat: "no-repeat", backgroundPosition: "right 16px center", borderColor: fieldErrors.room_allotment_id ? "#EF4444" : "#DCE3EE"}}
+                    >
+                      {allotmentOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label style={labelStyle}>Transaction Type <span style={{color:"#EF4444"}}>*</span></label>
+                    <select 
+                      value={formData.transaction_type}
+                      onChange={(e) => handleInputChange("transaction_type", e.target.value)}
+                      style={{...inputStyle, appearance: "none", backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%2364748B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>')`, backgroundRepeat: "no-repeat", backgroundPosition: "right 16px center", borderColor: fieldErrors.transaction_type ? "#EF4444" : "#DCE3EE"}}
+                    >
+                      {transactionTypeOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                    </select>
+                  </div>
                 </div>
-              ) : (
-                <div className="flex flex-col gap-4">
-                  <p className="text-sm text-muted-foreground m-0">
-                    Select the monthly rent logs below to link them with this ledger transaction. 
-                    Rent and penalty portions will be auto-calculated.
-                  </p>
-                  
-                  <TableContainer className="border border-gray-200 rounded-lg">
-                    <Table>
-                      <TableHeader>
-                        <TableRow className="bg-secondary/20 hover:bg-secondary/20 border-b border-gray-200">
-                          <TableHead className="w-[8%] font-semibold text-[13px]">Link</TableHead>
-                          <TableHead className="w-[30%] font-semibold text-[13px]">Reference Details</TableHead>
-                          <TableHead className="w-[20%] font-semibold text-[13px]">Month</TableHead>
-                          <TableHead className="w-[20%] font-semibold text-[13px]">Rent Amount</TableHead>
-                          <TableHead className="w-[22%] font-semibold text-[13px]">Penalty Amount</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {availableRentPayments.map((rp) => {
-                          const isLinked = (formData.months || []).some((m) => m.rent_payment_id === rp.id);
-                          const linkedMonth = (formData.months || []).find((m) => m.rent_payment_id === rp.id);
-                          const currentPenalty = linkedMonth ? (linkedMonth.penalty_amount || 0) : 0;
 
-                          return (
-                            <TableRow key={rp.id} className={isLinked ? "bg-primary/5" : "border-b border-gray-100 last:border-0"}>
-                              {/* Checkbox cell */}
-                              <TableCell>
-                                <input
-                                  type="checkbox"
-                                  checked={isLinked}
-                                  onChange={() => handleToggleMonth(rp)}
-                                  className="w-4 h-4 rounded border-gray-300 text-primary cursor-pointer focus:ring-primary"
-                                />
-                              </TableCell>
-                              
-                              {/* Reference Details */}
-                              <TableCell>
-                                <div className="flex flex-col">
-                                  <span className="font-semibold text-[14px]">{rp.name}</span>
-                                  <span className="text-[12px] font-mono text-muted-foreground mt-0.5">
-                                    ID: {rp.id.substring(0, 8)}...
-                                  </span>
-                                </div>
-                              </TableCell>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                  <div>
+                    <label style={labelStyle}>Payment Status <span style={{color:"#EF4444"}}>*</span></label>
+                    <select 
+                      value={formData.payment_status}
+                      onChange={(e) => handleInputChange("payment_status", e.target.value)}
+                      style={{...inputStyle, appearance: "none", backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%2364748B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>')`, backgroundRepeat: "no-repeat", backgroundPosition: "right 16px center"}}
+                    >
+                      {statusOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                    </select>
+                  </div>
 
-                              {/* Month Label */}
-                              <TableCell className="font-medium text-[14px]">
-                                {rp.against_month}
-                              </TableCell>
-
-                              {/* Rent Amount */}
-                              <TableCell className="font-bold text-[14px]">
-                                ${Number(rp.amount).toFixed(2)}
-                              </TableCell>
-
-                              {/* Penalty input */}
-                              <TableCell>
-                                <div className="relative max-w-[120px]">
-                                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[14px] text-muted-foreground font-medium">
-                                    $
-                                  </span>
-                                  <Input
-                                    type="number"
-                                    disabled={!isLinked}
-                                    value={isLinked ? currentPenalty : ""}
-                                    onChange={(e) => handleMonthPenaltyChange(rp.id, parseFloat(e.target.value) || 0)}
-                                    placeholder="0.00"
-                                    className="h-9 pl-7 text-[14px] border-gray-200 bg-white"
-                                  />
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          );
-                        })}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
+                  <div>
+                    <label style={labelStyle}>Posting Date & Time <span style={{color:"#EF4444"}}>*</span></label>
+                    <div style={{ position: "relative" }}>
+                      <input 
+                        type="datetime-local" 
+                        value={formData.posting_datetime || ""}
+                        onChange={(e) => handleInputChange("posting_datetime", e.target.value)}
+                        style={{...inputStyle, paddingRight: "40px"}}
+                      />
+                    </div>
+                  </div>
                 </div>
-              )}
-            </CardContent>
-          </Card>
+              </div>
+
+              <div style={{ height: "1px", backgroundColor: "#E5E7EB", margin: "24px 0" }}></div>
+
+              {/* Section 2: Amount Details */}
+              <div>
+                <h2 style={{ fontSize: "28px", fontWeight: "700", color: "#0F172A", marginBottom: "16px" }}>Amount Details</h2>
+                
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: "16px" }}>
+                  <div>
+                    <label style={labelStyle}>Rent Amount ($)</label>
+                    <input 
+                      type="number"
+                      value={formData.rent_amount ?? ""}
+                      onChange={(e) => handleInputChange("rent_amount", e.target.value)}
+                      style={inputStyle}
+                      className="placeholder:text-[#94A3B8] placeholder:text-[15px]"
+                      placeholder="0"
+                    />
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Penalty Amount ($)</label>
+                    <input 
+                      type="number"
+                      value={formData.penalty_amount ?? ""}
+                      onChange={(e) => handleInputChange("penalty_amount", e.target.value)}
+                      style={inputStyle}
+                      className="placeholder:text-[#94A3B8] placeholder:text-[15px]"
+                      placeholder="0"
+                    />
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Additional Charges ($)</label>
+                    <input 
+                      type="number"
+                      value={formData.transaction_charge ?? ""}
+                      onChange={(e) => handleInputChange("transaction_charge", e.target.value)}
+                      style={inputStyle}
+                      className="placeholder:text-[#94A3B8] placeholder:text-[15px]"
+                      placeholder="0"
+                    />
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Total Amount ($)</label>
+                    <input 
+                      type="number"
+                      readOnly
+                      value={formData.total_amount ?? ""}
+                      style={{...inputStyle, backgroundColor: "#F8FAFC", color: "#0F172A", fontWeight: "600"}}
+                    />
+                  </div>
+                </div>
+                <div style={{ fontSize: "15px", lineHeight: "1.6", color: "#475569", marginTop: "12px" }}>
+                  All amounts are in USD.
+                </div>
+              </div>
+
+              <div style={{ height: "1px", backgroundColor: "#E5E7EB", margin: "24px 0" }}></div>
+
+              {/* Section 3: Notes */}
+              <div>
+                <h2 style={{ fontSize: "28px", fontWeight: "700", color: "#0F172A", marginBottom: "16px" }}>Notes</h2>
+                
+                <div>
+                  <label style={labelStyle}>Internal Notes</label>
+                  <textarea 
+                    value={formData.summary_json || ""}
+                    onChange={(e) => handleInputChange("summary_json", e.target.value)}
+                    placeholder="Add any internal notes or remarks for this payment record."
+                    style={{...inputStyle, height: "140px", paddingTop: "12px", paddingBottom: "12px", resize: "none"}}
+                    className="placeholder:text-[#94A3B8] placeholder:text-[15px]"
+                  />
+                </div>
+                <div style={{ fontSize: "15px", lineHeight: "1.6", color: "#475569", marginTop: "12px" }}>
+                  Add any internal notes or remarks for this payment record.
+                </div>
+              </div>
+
+            </div>
+          </>
         )}
 
-        {/* CARD 3: Amount Breakdown */}
-        <Card className={cardClass}>
-          <CardHeader className={cardHeaderClass}>
-            <CardTitle className={cardTitleClass}>Amount Breakdown</CardTitle>
-          </CardHeader>
-          <CardContent className={cardContentClass}>
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-5 items-end">
-              
-              {/* Rent Portion */}
-              <div>
-                <label className={labelClass}>Rent Amount ($)</label>
-                <Input
-                  type="number"
-                  value={formData.rent_amount ?? ""}
-                  onChange={(e) => handleInputChange("rent_amount", e.target.value)}
-                  placeholder="0.00"
-                  step="0.01"
-                  min="0"
-                  className="text-[14px] h-10 border-gray-200"
-                />
-                <span className={helperClass}>Portion of the payment designated as rent.</span>
-              </div>
-
-              {/* Penalty Portion */}
-              <div>
-                <label className={labelClass}>Penalty Amount ($)</label>
-                <Input
-                  type="number"
-                  value={formData.penalty_amount ?? ""}
-                  onChange={(e) => handleInputChange("penalty_amount", e.target.value)}
-                  placeholder="0.00"
-                  step="0.01"
-                  min="0"
-                  className="text-[14px] h-10 border-gray-200"
-                />
-                <span className={helperClass}>Portion of the payment designated as penalties.</span>
-              </div>
-
-              {/* Transaction Charge */}
-              <div>
-                <label className={labelClass}>Additional Charges ($)</label>
-                <Input
-                  type="number"
-                  value={formData.transaction_charge ?? ""}
-                  onChange={(e) => handleInputChange("transaction_charge", e.target.value)}
-                  placeholder="0.00"
-                  step="0.01"
-                  min="0"
-                  className="text-[14px] h-10 border-gray-200"
-                />
-                <span className={helperClass}>Surcharges or administrative fees.</span>
-              </div>
-
-              {/* Stressed Total Amount */}
-              <div>
-                <label className={`${labelClass} !text-foreground !font-bold`}>Total Amount ($)</label>
-                <Input
-                  type="number"
-                  value={formData.total_amount ?? ""}
-                  readOnly
-                  placeholder="0.00"
-                  step="0.01"
-                  className={`h-[44px] font-bold text-lg cursor-not-allowed opacity-90 bg-secondary/15 ${fieldErrors.total_amount ? "border-destructive" : "border-gray-300"}`}
-                />
-                {fieldErrors.total_amount && <span className="text-[12px] text-destructive mt-1.5 block">{fieldErrors.total_amount}</span>}
-              </div>
-
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* CARD 4: Additional Information */}
-        <Card className={cardClass}>
-          <CardHeader className={cardHeaderClass}>
-            <CardTitle className={cardTitleClass}>Additional Information</CardTitle>
-          </CardHeader>
-          <CardContent className={cardContentClass}>
-            <div className="grid grid-cols-1 gap-5">
-              
-              {formData.transaction_type === "Room Transfer" && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                  {/* Target Room Allotment */}
-                  <div>
-                    <label className={labelClass}>Target Room Allotment</label>
-                    <Input
-                      value={formData.target_room_allotment || ""}
-                      onChange={(e) => handleInputChange("target_room_allotment", e.target.value)}
-                      placeholder="e.g. Room 102 (or Room Allotment Code)"
-                      className="text-[14px] h-10 border-gray-200"
-                    />
-                    <span className={helperClass}>Used primarily for room transfer settlements to note destinations.</span>
-                  </div>
-
-                  {/* Contract Event */}
-                  <div>
-                    <label className={labelClass}>Associated Contract Event</label>
-                    <Select
-                      value={formData.contract_event_id}
-                      onChange={(e) => handleInputChange("contract_event_id", e.target.value)}
-                      options={contractEventOptions}
-                      disabled={!formData.student_id}
-                      className="text-[14px] h-10 border-gray-200"
-                    />
-                    {!formData.student_id && (
-                      <span className={helperClass}>Select a student first to load contract events.</span>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Internal Notes textarea */}
-              <div className="w-full">
-                <label className={labelClass}>Internal Notes</label>
-                <textarea
-                  value={formData.summary_json || ""}
-                  onChange={(e) => handleInputChange("summary_json", e.target.value)}
-                  placeholder="Provide any internal notes or remarks about this payment..."
-                  className={`flex min-h-[80px] w-full rounded-md border bg-transparent px-3 py-2 text-[14px] shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 ${fieldErrors.summary_json ? "border-destructive focus-visible:ring-destructive" : "border-gray-200"}`}
-                  rows={4}
-                />
-                {fieldErrors.summary_json ? (
-                  <span className="text-[12px] text-destructive mt-1.5 block">{fieldErrors.summary_json}</span>
-                ) : (
-                  <span className={helperClass}>Provide any internal notes or remarks for administrative reference.</span>
-                )}
-              </div>
-
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Footer Buttons */}
-        <div className="flex justify-end gap-3 pt-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="md"
-            onClick={handleCancelClick}
-            disabled={isSubmitting}
-            className="gap-1.5 h-10 px-5 rounded-lg border-gray-300 hover:bg-gray-50"
-          >
-            <X size={16} />
-            <span className="font-semibold text-[14px]">Cancel</span>
-          </Button>
-
-          <Button
-            type="submit"
-            variant="primary"
-            size="md"
-            disabled={isSubmitting}
-            className="gap-1.5 h-10 px-5 rounded-lg shadow-sm"
-          >
-            <Save size={16} />
-            <span className="font-semibold text-[14px]">{isSubmitting ? "Saving record..." : "Save Payment Record"}</span>
-          </Button>
-        </div>
-
-      </form>
+      </div>
     </div>
   );
 };

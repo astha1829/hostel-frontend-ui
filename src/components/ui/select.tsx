@@ -10,15 +10,16 @@ export interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElemen
   label?: string;
   options: SelectOption[];
   error?: string;
+  labelClassName?: string;
 }
 
 export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
-  ({ className, label, options, error, id, ...props }, ref) => {
+  ({ className, label, options, error, labelClassName, id, ...props }, ref) => {
     const selectId = id || React.useId();
     return (
       <div className="flex flex-col gap-1.5 w-full">
         {label && (
-          <label htmlFor={selectId} className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+          <label htmlFor={selectId} className={cn("form-label", labelClassName)}>
             {label.endsWith(" *") ? (
               <>
                 {label.substring(0, label.length - 2)}
@@ -38,7 +39,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           id={selectId}
           ref={ref}
           className={cn(
-            "flex w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-transparent disabled:cursor-not-allowed disabled:opacity-50",
+            "select-standard flex w-full rounded-md border border-input bg-card transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-transparent disabled:cursor-not-allowed disabled:opacity-50",
             error && "border-destructive focus-visible:ring-destructive",
             className
           )}

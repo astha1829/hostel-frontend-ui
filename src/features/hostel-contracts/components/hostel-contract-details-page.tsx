@@ -19,9 +19,10 @@ import { useHostelContractDetails } from "../hooks/use-hostel-contract-details";
 
 interface HostelContractDetailsPageProps {
   id: string;
+  initialEditMode?: boolean;
 }
 
-export const HostelContractDetailsPage: React.FC<HostelContractDetailsPageProps> = ({ id }) => {
+export const HostelContractDetailsPage: React.FC<HostelContractDetailsPageProps> = ({ id, initialEditMode = false }) => {
   const {
     contract,
     hostels,
@@ -38,7 +39,7 @@ export const HostelContractDetailsPage: React.FC<HostelContractDetailsPageProps>
     handleInputChange,
     saveChanges,
     reload,
-  } = useHostelContractDetails(id);
+  } = useHostelContractDetails(id, initialEditMode);
 
   if (isLoading) {
     return <DetailFormSkeleton />;
@@ -106,7 +107,7 @@ export const HostelContractDetailsPage: React.FC<HostelContractDetailsPageProps>
             <X size={16} />
             <span>Cancel</span>
           </Button>
-          <Button variant="primary" size="md" onClick={saveChanges} isLoading={isSaving}>
+          <Button className="btn-top-action">
             <Save size={16} />
             <span>Save Contract</span>
           </Button>
@@ -116,7 +117,7 @@ export const HostelContractDetailsPage: React.FC<HostelContractDetailsPageProps>
           <Button variant="outline" size="md" onClick={reload} className="p-2" title="Reload details">
             <RefreshCw size={16} />
           </Button>
-          <Button variant="primary" size="md" onClick={toggleEditMode}>
+          <Button className="btn-top-action">
             <Edit2 size={16} />
             <span>Edit Contract</span>
           </Button>
@@ -136,7 +137,7 @@ export const HostelContractDetailsPage: React.FC<HostelContractDetailsPageProps>
   }));
 
   return (
-    <div className="flex flex-col gap-6 animate-in slide-in-from-bottom-4 duration-500">
+    <div className="container-page flex flex-col gap-6 animate-in slide-in-from-bottom-4 duration-500">
       {/* Success Banner */}
       {successMessage && (
         <div className="flex items-center gap-3 p-4 bg-success/15 text-success border border-success/25 rounded-md text-sm font-semibold animate-in slide-in-from-top-2 duration-300">
@@ -188,20 +189,20 @@ export const HostelContractDetailsPage: React.FC<HostelContractDetailsPageProps>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5 z-[1]">
             <div className="flex flex-col gap-1">
-              <span className="text-xs font-bold text-muted-foreground uppercase tracking-[0.05em]">Contract Value</span>
+              <span className="form-label">Contract Value</span>
               <span className="text-lg font-extrabold text-primary">{formatPrice(contract.contract_price)}</span>
             </div>
             <div className="flex flex-col gap-1">
-              <span className="text-xs font-bold text-muted-foreground uppercase tracking-[0.05em]">Duration Plan</span>
-              <span className="text-[15px] font-bold text-foreground">{contract.standard_duration_months || "—"} Months</span>
+              <span className="form-label">Duration Plan</span>
+              <span className="body-text-primary">{contract.standard_duration_months || "—"} Months</span>
             </div>
             <div className="flex flex-col gap-1">
-              <span className="text-xs font-bold text-muted-foreground uppercase tracking-[0.05em]">Sharing Class</span>
-              <span className="text-[15px] font-bold text-foreground">{contract.sharing || "Single"} Room</span>
+              <span className="form-label">Sharing Class</span>
+              <span className="body-text-primary">{contract.sharing || "Single"} Room</span>
             </div>
             <div className="flex flex-col gap-1">
-              <span className="text-xs font-bold text-muted-foreground uppercase tracking-[0.05em]">Category Type</span>
-              <span className="text-[15px] font-bold text-foreground">{contract.contract_type}</span>
+              <span className="form-label">Category Type</span>
+              <span className="body-text-primary">{contract.contract_type}</span>
             </div>
           </div>
         </Card>
@@ -357,20 +358,20 @@ export const HostelContractDetailsPage: React.FC<HostelContractDetailsPageProps>
             <SectionCard title="Contract Specifications" description="Overview of standard lease parameters, sharing conditions, and billing rates.">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8">
                 <div className="flex flex-col gap-1 border-b border-border/50 pb-2">
-                  <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Contract Number</span>
+                  <span className="form-label">Contract Number</span>
                   <span className="text-[15px] font-mono font-bold text-primary">{contract.contract_no}</span>
                 </div>
                 <div className="flex flex-col gap-1 border-b border-border/50 pb-2">
-                  <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Category Type</span>
-                  <span className="text-[15px] font-semibold text-foreground">{contract.contract_type}</span>
+                  <span className="form-label">Category Type</span>
+                  <span className="body-text-primary">{contract.contract_type}</span>
                 </div>
                 <div className="flex flex-col gap-1 border-b border-border/50 pb-2">
-                  <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Standard Duration</span>
-                  <span className="text-[15px] font-semibold text-foreground">{contract.standard_duration_months ? `${contract.standard_duration_months} Months` : "—"}</span>
+                  <span className="form-label">Standard Duration</span>
+                  <span className="body-text-primary">{contract.standard_duration_months ? `${contract.standard_duration_months} Months` : "—"}</span>
                 </div>
                 <div className="flex flex-col gap-1 border-b border-border/50 pb-2">
-                  <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Sharing Class Allotment</span>
-                  <span className="text-[15px] font-semibold text-foreground">{contract.sharing ? `${contract.sharing} Room` : "Single"}</span>
+                  <span className="form-label">Sharing Class Allotment</span>
+                  <span className="body-text-primary">{contract.sharing ? `${contract.sharing} Room` : "Single"}</span>
                 </div>
               </div>
             </SectionCard>
@@ -381,7 +382,7 @@ export const HostelContractDetailsPage: React.FC<HostelContractDetailsPageProps>
                 
                 {/* Hostel relation */}
                 <div className="p-5 bg-secondary/10 border border-border/60 rounded-md flex flex-col gap-3">
-                  <span className="text-xs font-bold text-muted-foreground uppercase tracking-[0.05em]">Hostel Residence</span>
+                  <span className="form-label">Hostel Residence</span>
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-sm bg-primary/10 text-primary flex items-center justify-center shrink-0">
                       <Building2 size={16} />
@@ -397,7 +398,7 @@ export const HostelContractDetailsPage: React.FC<HostelContractDetailsPageProps>
 
                 {/* Student relation */}
                 <div className="p-5 bg-secondary/10 border border-border/60 rounded-md flex flex-col gap-3">
-                  <span className="text-xs font-bold text-muted-foreground uppercase tracking-[0.05em]">Resident Student</span>
+                  <span className="form-label">Resident Student</span>
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-sm bg-primary/10 text-primary flex items-center justify-center shrink-0">
                       <Users size={16} />
@@ -421,7 +422,7 @@ export const HostelContractDetailsPage: React.FC<HostelContractDetailsPageProps>
                   
                   {/* Node 1: Expected Arrival */}
                   <div className="flex flex-col gap-1 flex-1 min-w-[120px]">
-                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-[0.05em]">Expected Arrival</span>
+                    <span className="form-label">Expected Arrival</span>
                     <div className="flex items-center gap-1.5">
                       <Calendar size={15} className="text-primary" />
                       <span className="text-sm font-semibold text-foreground">
@@ -437,7 +438,7 @@ export const HostelContractDetailsPage: React.FC<HostelContractDetailsPageProps>
 
                   {/* Node 2: Start Lease */}
                   <div className="flex flex-col gap-1 flex-1 min-w-[120px]">
-                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-[0.05em]">Start Date</span>
+                    <span className="form-label">Start Date</span>
                     <div className="flex items-center gap-1.5">
                       <Sparkles size={15} className="text-success" />
                       <span className="text-sm font-semibold text-foreground">
@@ -453,7 +454,7 @@ export const HostelContractDetailsPage: React.FC<HostelContractDetailsPageProps>
 
                   {/* Node 3: End Lease */}
                   <div className="flex flex-col gap-1 flex-1 min-w-[120px]">
-                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-[0.05em]">End Date</span>
+                    <span className="form-label">End Date</span>
                     <div className="flex items-center gap-1.5">
                       <AlertCircle size={15} className="text-destructive" />
                       <span className="text-sm font-semibold text-foreground">
@@ -485,7 +486,7 @@ export const HostelContractDetailsPage: React.FC<HostelContractDetailsPageProps>
                 {/* Price Rate Highlight */}
                 <div className="p-5 bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 rounded-md flex items-center justify-between">
                   <div className="flex flex-col">
-                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-[0.05em]">Contract Price Rate</span>
+                    <span className="form-label">Contract Price Rate</span>
                     <span className="text-[28px] font-extrabold text-primary mt-1 tracking-[-0.02em]">
                       {formatPrice(contract.contract_price)}
                     </span>

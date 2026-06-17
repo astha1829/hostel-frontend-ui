@@ -9,7 +9,11 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { useRoomAllotmentForm } from "../hooks/use-room-allotment-form";
 
-export const RoomAllotmentFormPage: React.FC = () => {
+export interface RoomAllotmentFormPageProps {
+  id?: string;
+}
+
+export const RoomAllotmentFormPage: React.FC<RoomAllotmentFormPageProps> = ({ id }) => {
   const router = useRouter();
 
   const handleSuccess = (allotmentId: string) => {
@@ -36,7 +40,7 @@ export const RoomAllotmentFormPage: React.FC = () => {
     handleFloorChange,
     handleStudentChange,
     handleSubmit,
-  } = useRoomAllotmentForm({ onSuccess: handleSuccess, onCancel: handleCancel });
+  } = useRoomAllotmentForm({ id, onSuccess: handleSuccess, onCancel: handleCancel });
 
   const hostelOptions = (hostels || []).map((h) => ({
     label: h.hostel_name,
@@ -67,8 +71,8 @@ export const RoomAllotmentFormPage: React.FC = () => {
     <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }} className="animate-slide-in">
       {/* Header */}
       <PageHeader
-        title="Add Allotment"
-        description="Allocate a student to a room floor level, set billing rent, and link stay contracts."
+        title={id ? "Edit Allotment" : "Add Allotment"}
+        description={id ? "Modify student room allocation and billing parameters." : "Allocate a student to a room floor level, set billing rent, and link stay contracts."}
         backHref="/room-allotments"
         backText="Back to Allotments"
         actions={
@@ -77,9 +81,9 @@ export const RoomAllotmentFormPage: React.FC = () => {
               <X size={16} />
               <span>Cancel</span>
             </Button>
-            <Button variant="primary" size="md" type="submit" isLoading={isSubmitting}>
+            <Button className="btn-top-action">
               <Save size={16} />
-              <span>Save Allotment</span>
+              <span>{id ? "Update Allotment" : "Save Allotment"}</span>
             </Button>
           </div>
         }

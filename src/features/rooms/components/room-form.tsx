@@ -11,9 +11,11 @@ import { showCancelConfirm } from "@/utils/swal";
 interface RoomFormProps {
   onSuccess: () => void;
   onClose: () => void;
+  initialHostelId?: string;
+  initialFloorId?: string;
 }
 
-export const RoomForm: React.FC<RoomFormProps> = ({ onSuccess, onClose }) => {
+export const RoomForm: React.FC<RoomFormProps> = ({ onSuccess, onClose, initialHostelId, initialFloorId }) => {
   const {
     hostels,
     floors,
@@ -40,7 +42,7 @@ export const RoomForm: React.FC<RoomFormProps> = ({ onSuccess, onClose }) => {
     qrCode,
     setQrCode,
     save,
-  } = useRoomForm(onSuccess);
+  } = useRoomForm(onSuccess, initialHostelId, initialFloorId);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

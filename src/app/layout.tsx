@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { Navbar } from "@/components/ui/navbar";
+import { ClientLayout } from "@/components/layout/client-layout";
 import "./globals.css";
 
 const inter = Inter({
@@ -21,11 +21,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={inter.variable} suppressHydrationWarning>
-      <body className="bg-[#F8FAFC] text-foreground antialiased min-h-screen flex flex-col" suppressHydrationWarning>
-        <Navbar />
-        <main className="flex-1 flex flex-col p-6 sm:p-8 lg:p-10 max-w-[1680px] w-full mx-auto">
+      <body className="bg-background text-foreground antialiased min-h-screen flex" suppressHydrationWarning>
+        <ClientLayout>
           {children}
-        </main>
+        </ClientLayout>
       </body>
     </html>
   );

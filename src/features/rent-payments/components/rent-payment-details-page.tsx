@@ -90,7 +90,7 @@ export const RentPaymentDetailsPage: React.FC<RentPaymentDetailsPageProps> = ({ 
   const amountColor = isCredit ? "hsl(142.1 76.2% 36.3%)" : "hsl(var(--destructive))";
 
   return (
-    <div className="flex flex-col gap-6 animate-in slide-in-from-bottom-4 duration-500">
+    <div className="container-page flex flex-col gap-6 animate-in slide-in-from-bottom-4 duration-500">
       {/* Page Header Actions / Back Nav */}
       <PageHeader
         title={payment.name ? `Rent Payment: ${payment.name}` : "Rent Payment Details"}
@@ -200,15 +200,15 @@ export const RentPaymentDetailsPage: React.FC<RentPaymentDetailsPageProps> = ({ 
           </div>
           <div>
             <span className="block text-xs text-muted-foreground uppercase font-semibold mb-1">Posting Date</span>
-            <span className="text-[15px] font-semibold text-foreground">{formatDate(payment.posting_datetime)}</span>
+            <span className="body-text-primary">{formatDate(payment.posting_datetime)}</span>
           </div>
           <div>
             <span className="block text-xs text-muted-foreground uppercase font-semibold mb-1">Student</span>
-            <span className="text-[15px] font-semibold text-foreground truncate block" title={studentName}>{studentName}</span>
+            <span className="body-text-primary truncate block" title={studentName}>{studentName}</span>
           </div>
           <div>
             <span className="block text-xs text-muted-foreground uppercase font-semibold mb-1">Allotment</span>
-            <span className="text-[15px] font-semibold text-foreground truncate block" title={payment.room_allotment_name || ""}>{payment.room_allotment_name || "—"}</span>
+            <span className="body-text-primary truncate block" title={payment.room_allotment_name || ""}>{payment.room_allotment_name || "—"}</span>
           </div>
         </div>
       </div>

@@ -21,7 +21,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   ...props
 }) => {
   return (
-    <div className={cn("flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-6", className)} {...props}>
+    <div className={cn("flex justify-between items-start mb-[24px] gap-6", className)} {...props}>
       <div className="flex flex-col gap-1">
         {backHref && (
           <Link href={backHref} className="inline-flex items-center gap-1 text-sm font-semibold text-muted-foreground hover:text-primary transition-colors mb-2">
@@ -30,8 +30,8 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
           </Link>
         )}
         <div className={backHref ? "mt-1" : ""}>
-          <h1 className="text-[32px] font-bold tracking-tight text-foreground leading-tight">{title}</h1>
-          {description && <p className="text-sm font-medium text-muted-foreground mt-1">{description}</p>}
+          <h1 className="page-title">{title}</h1>
+          {description && <p className="page-subtitle">{description}</p>}
         </div>
       </div>
       {actions && <div className="flex items-center gap-3 w-full md:w-auto">{actions}</div>}

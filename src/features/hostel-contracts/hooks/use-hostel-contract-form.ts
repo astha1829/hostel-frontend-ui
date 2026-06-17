@@ -3,7 +3,7 @@ import { HostelContractsApi } from "../api";
 import { CreateHostelContractPayload } from "../types";
 import { Hostel } from "../../hostels/types";
 import { Student } from "../../students/types";
-import { showSuccess, showError, showLoading, closeLoading } from "@/utils/swal";
+import { showDeleteSuccess, showDeleteError, showLoading, closeLoading, showSuccess, showError } from '@/utils/swal';
 
 interface UseHostelContractFormProps {
   onSuccess: (id: string) => void;

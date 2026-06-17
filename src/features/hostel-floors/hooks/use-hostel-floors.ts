@@ -3,7 +3,7 @@ import { HostelFloor } from "../types";
 import { HostelFloorsApi } from "../api";
 import { HostelApi } from "../../hostels/api";
 import { Hostel } from "../../hostels/types";
-import { showDeleteConfirm, showSuccess, showError, showLoading, closeLoading } from "@/utils/swal";
+import { showDeleteConfirm, showDeleteSuccess, showDeleteError, showLoading, closeLoading } from "@/utils/swal";
 
 export function useHostelFloors() {
   const [floors, setFloors] = useState<HostelFloor[]>([]);
@@ -16,6 +16,7 @@ export function useHostelFloors() {
     totalFloors: 0,
     uniqueSeries: 0,
     totalRooms: 0,
+    totalBeds: 0,
     hostelsCovered: 0,
     isLoading: true,
   });
@@ -48,12 +49,16 @@ export function useHostelFloors() {
       const totalF = floorsList.length;
       const uniqueS = new Set(floorsList.map(f => f.room_number_series).filter(Boolean)).size;
       const totalR = floorsList.reduce((sum, f) => sum + (f.rooms?.length || 0), 0);
+      const totalB = floorsList.reduce((sum, f) => {
+        return sum + (f.rooms?.reduce((roomSum, r) => roomSum + (r.capacity || 0), 0) || 0);
+      }, 0);
       const hostelsC = new Set(floorsList.map(f => f.hostel_id).filter(Boolean)).size;
 
       setStats({
         totalFloors: totalF,
         uniqueSeries: uniqueS,
         totalRooms: totalR,
+        totalBeds: totalB,
         hostelsCovered: hostelsC,
         isLoading: false,
       });
@@ -138,12 +143,12 @@ export function useHostelFloors() {
     try {
       await HostelFloorsApi.deleteHostelFloor(id);
       closeLoading();
-      await showSuccess("Deleted Successfully", "Record has been removed successfully.");
+      await showDeleteSuccess();
       fetchFloors();
       fetchStats();
     } catch (err: any) {
       closeLoading();
-      showError("Delete Failed", err.message || "Failed to delete hostel floor.");
+      await showDeleteError();
     }
   };
 

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { RentPaymentsApi } from "../api";
 import { RentPayment, StudentSummary } from "../types";
-import { showDeleteConfirm, showSuccess, showError, showLoading, closeLoading } from "@/utils/swal";
+import { showDeleteConfirm, showDeleteSuccess, showDeleteError, showLoading, closeLoading } from "@/utils/swal";
 
 export const useRentPayments = () => {
   const [payments, setPayments] = useState<RentPayment[]>([]);
@@ -91,11 +91,11 @@ export const useRentPayments = () => {
     try {
       await RentPaymentsApi.deleteRentPayment(id);
       closeLoading();
-      await showSuccess("Deleted Successfully", "Record has been removed successfully.");
+      await showDeleteSuccess();
       await loadData();
     } catch (err: any) {
       closeLoading();
-      showError("Delete Failed", err.message || "Failed to delete rent payment.");
+      await showDeleteError();
     }
   };
 

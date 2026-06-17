@@ -106,7 +106,7 @@ export const StudentFormPage: React.FC = () => {
   ];
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-6 animate-in slide-in-from-bottom-4 duration-500">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4 animate-in slide-in-from-bottom-4 duration-500">
       {/* Header */}
       <PageHeader
         title="Register New Student"
@@ -119,7 +119,7 @@ export const StudentFormPage: React.FC = () => {
               <X size={16} />
               <span>Cancel</span>
             </Button>
-            <Button variant="primary" size="md" type="submit" isLoading={isSubmitting}>
+            <Button className="btn-top-action">
               <Save size={16} />
               <span>Save Student</span>
             </Button>
@@ -136,7 +136,7 @@ export const StudentFormPage: React.FC = () => {
       )}
 
       {/* Form sections */}
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-4">
         
         {/* Section 1: Personal & Institutional */}
         <SectionCard title="Personal & College Details" description="Primary identification information and college affiliations.">

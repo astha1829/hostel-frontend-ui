@@ -18,6 +18,7 @@ export interface HostelContractEvent {
   triggered_on: string | null;
   effective_date: string | null;
   settlement_rap: string | null;
+  remarks: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -36,6 +37,7 @@ export interface CreateHostelContractEventPayload {
   triggered_on?: string;
   effective_date?: string;
   settlement_rap?: string | null;
+  remarks?: string | null;
 }
 
 export interface UpdateHostelContractEventPayload extends Partial<CreateHostelContractEventPayload> {}

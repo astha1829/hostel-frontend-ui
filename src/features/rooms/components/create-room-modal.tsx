@@ -8,12 +8,16 @@ interface CreateRoomModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  initialHostelId?: string;
+  initialFloorId?: string;
 }
 
 export const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
   isOpen,
   onClose,
   onSuccess,
+  initialHostelId,
+  initialFloorId,
 }) => {
   return (
     <Dialog
@@ -26,6 +30,8 @@ export const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
       <RoomForm
         onSuccess={onSuccess}
         onClose={onClose}
+        initialHostelId={initialHostelId}
+        initialFloorId={initialFloorId}
       />
     </Dialog>
   );

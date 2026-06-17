@@ -86,13 +86,13 @@ export const StudentWalletTab: React.FC<StudentWalletTabProps> = ({ studentId, s
   }
 
   return (
-    <div className="flex flex-col gap-6 animate-in slide-in-from-bottom-4 duration-500">
+    <div className="container-page flex flex-col gap-6 animate-in slide-in-from-bottom-4 duration-500">
       
       {/* Wallet Balance Summary Card */}
       <Card className="p-6 border border-border/80 shadow-sm bg-gradient-to-br from-secondary/5 to-secondary/20">
         <div className="flex items-center justify-between flex-wrap gap-5">
           <div className="flex flex-col">
-            <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
+            <span className="form-label">
               Student Wallet Balance
             </span>
             <span className="text-4xl font-black text-primary mt-1 tracking-tight">

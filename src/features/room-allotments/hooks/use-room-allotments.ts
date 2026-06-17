@@ -3,7 +3,7 @@ import { RoomAllotmentsApi } from "../api";
 import { RoomAllotment } from "../types";
 import { Hostel } from "../../hostels/types";
 import { Student } from "../../students/types";
-import { showDeleteConfirm, showSuccess, showError, showLoading, closeLoading } from "@/utils/swal";
+import { showDeleteConfirm, showDeleteSuccess, showDeleteError, showLoading, closeLoading } from "@/utils/swal";
 
 export const useRoomAllotments = () => {
   const [allotments, setAllotments] = useState<RoomAllotment[]>([]);
@@ -85,11 +85,11 @@ export const useRoomAllotments = () => {
     try {
       await RoomAllotmentsApi.deleteRoomAllotment(id);
       closeLoading();
-      await showSuccess("Deleted Successfully", "Record has been removed successfully.");
+      await showDeleteSuccess();
       await loadData();
     } catch (err: any) {
       closeLoading();
-      showError("Delete Failed", err.message || "Failed to delete room allotment.");
+      await showDeleteError();
     }
   };
 
