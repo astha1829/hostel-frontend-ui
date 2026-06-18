@@ -2,73 +2,85 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { 
-  Building2, 
-  Users, 
-  Home, 
-  FileText, 
-  Layers, 
-  ClipboardList, 
-  CreditCard, 
-  Banknote, 
-  Calendar, 
+import {
+  Building2,
+  Layers,
+  Bed,
+  Users,
+  FileText,
+  CreditCard,
+  Banknote,
+  Calendar,
   History,
-  ArrowRight,
-  TrendingUp,
-  LayoutDashboard
+  ChevronRight,
+  Plus
 } from "lucide-react";
-import { PageHeader } from "@/components/ui/page-header";
 import { useAuth } from "@/features/auth";
 import { http } from "@/lib/http";
+import { RoomsApi } from "@/features/rooms/api";
 
 interface DashboardStats {
   hostelsCount: number;
-  studentsCount: number;
+  floorsCount: number;
   roomsCount: number;
+  studentsCount: number;
   contractsCount: number;
 }
 
 export default function DashboardPage() {
   const router = useRouter();
   const { user } = useAuth();
+  
   const [stats, setStats] = useState<DashboardStats>({
     hostelsCount: 0,
-    studentsCount: 0,
+    floorsCount: 0,
     roomsCount: 0,
+    studentsCount: 0,
     contractsCount: 0
   });
+  
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     async function loadStats() {
       try {
-        // Fetch data from endpoints to populate counts (best-effort)
-        const [hostels, students, contracts] = await Promise.allSettled([
-          http.get<any[]>("/hostels"),
-          http.get<any[]>("/students"),
-          http.get<any[]>("/hostel-contracts")
+        const [hostels, floors, rooms, students, contracts] = await Promise.allSettled([
+          http.get<any>("/hostels"),
+          http.get<any>("/hostel-floors"),
+          RoomsApi.getRooms(),
+          http.get<any>("/students"),
+          http.get<any>("/hostel-contracts")
         ]);
 
-        const hostelsCount = hostels.status === "fulfilled" ? (hostels.value?.length || 0) : 12;
-        const studentsCount = students.status === "fulfilled" ? (students.value?.length || 0) : 148;
-        const contractsCount = contracts.status === "fulfilled" ? (contracts.value?.length || 0) : 84;
-        
-        // Rooms can be estimated or hardcoded for a dynamic design
+        const hostelsCount = hostels.status === "fulfilled" && hostels.value
+          ? (hostels.value.meta?.total ?? hostels.value.data?.length ?? 0)
+          : 0;
+
+        const floorsCount = floors.status === "fulfilled" && floors.value
+          ? (floors.value.meta?.total ?? floors.value.data?.length ?? 0)
+          : 0;
+
+        const roomsCount = rooms.status === "fulfilled" && rooms.value
+          ? rooms.value.length
+          : 0;
+
+        const studentsCount = students.status === "fulfilled" && students.value
+          ? (students.value.meta?.total ?? students.value.data?.length ?? 0)
+          : 0;
+
+        const contractsCount = contracts.status === "fulfilled" && contracts.value
+          ? (contracts.value.meta?.total ?? contracts.value.data?.length ?? 0)
+          : 0;
+
         setStats({
           hostelsCount,
+          floorsCount,
+          roomsCount,
           studentsCount,
-          roomsCount: hostelsCount * 24 || 288,
           contractsCount
         });
       } catch (err) {
         console.error("Error loading dashboard stats", err);
-        // Fallback default mockup values
-        setStats({
-          hostelsCount: 4,
-          studentsCount: 148,
-          roomsCount: 96,
-          contractsCount: 84
-        });
       } finally {
         setIsLoading(false);
       }
@@ -81,149 +93,324 @@ export default function DashboardPage() {
     {
       title: "Total Hostels",
       value: stats.hostelsCount,
-      description: "Managed hostel properties",
+      description: "Managed properties",
       icon: Building2,
-      color: "text-purple-600 bg-purple-50 border-purple-100",
       href: "/hostels",
+      accentBg: "bg-[#6D4AFF]",
+      iconStyle: "bg-[#F4F1FF] text-[#6D4AFF] border-[#E5DEFF]"
     },
     {
-      title: "Active Students",
-      value: stats.studentsCount,
-      description: "Registered & verified residents",
-      icon: Users,
-      color: "text-emerald-600 bg-emerald-50 border-emerald-100",
-      href: "/students",
+      title: "Total Floors",
+      value: stats.floorsCount,
+      description: "Registered floors",
+      icon: Layers,
+      href: "/floors",
+      accentBg: "bg-[#22C55E]",
+      iconStyle: "bg-[#ECFDF5] text-[#10B981] border-[#A7F3D0]"
     },
     {
       title: "Total Rooms",
       value: stats.roomsCount,
-      description: "Inventory capacity across units",
-      icon: Home,
-      color: "text-blue-600 bg-blue-50 border-blue-100",
+      description: "Total rooms available",
+      icon: Bed,
       href: "/rooms",
+      accentBg: "bg-[#3B82F6]",
+      iconStyle: "bg-[#EFF6FF] text-[#3B82F6] border-[#BFDBFE]"
+    },
+    {
+      title: "Total Students",
+      value: stats.studentsCount,
+      description: "Registered students",
+      icon: Users,
+      href: "/students",
+      accentBg: "bg-[#F97316]",
+      iconStyle: "bg-[#FFF7ED] text-[#F97316] border-[#FFEDD5]"
     },
     {
       title: "Active Contracts",
       value: stats.contractsCount,
-      description: "Lease agreements & status",
+      description: "Active lease agreements",
       icon: FileText,
-      color: "text-amber-600 bg-amber-50 border-amber-100",
-      href: "/hostel-contracts",
-    },
+      href: "/contracts",
+      accentBg: "bg-[#EC4899]",
+      iconStyle: "bg-[#FFF1F2] text-[#F43F5E] border-[#FECDD3]"
+    }
   ];
 
-  const quickLinks = [
-    { name: "Hostels", description: "Hostel details & facilities", href: "/hostels", icon: Building2 },
-    { name: "Floors", description: "Configure floors & rooms", href: "/hostel-floors", icon: Layers },
-    { name: "Rooms", description: "Manage room allotments", href: "/rooms", icon: Home },
-    { name: "Students", description: "Resident directories", href: "/students", icon: Users },
-    { name: "Contracts", description: "Hostel student agreements", href: "/hostel-contracts", icon: FileText },
-    { name: "Allotments", description: "Assign students to rooms", href: "/room-allotments", icon: ClipboardList },
-    { name: "Payments", description: "Verify deposit payments", href: "/room-allotment-payments", icon: CreditCard },
-    { name: "Rent Payments", description: "Recurring hostel rent bills", href: "/rent-payments", icon: Banknote },
-    { name: "Contract Events", description: "Timeline of contract state updates", href: "/hostel-contract-events", icon: Calendar },
-    { name: "Contract History", description: "Historical ledger records", href: "/hostel-contract-history", icon: History },
+  const sections = [
+    {
+      title: "Operations",
+      accentColor: "text-[#6D4AFF]",
+      barColor: "bg-[#6D4AFF]",
+      items: [
+        {
+          title: "Hostels",
+          description: "Manage hostel details and facilities",
+          href: "/hostels",
+          icon: Building2,
+          iconStyle: "bg-[#F4F1FF] text-[#6D4AFF] border-[#E5DEFF]"
+        },
+        {
+          title: "Floors",
+          description: "Configure floors and their structure",
+          href: "/floors",
+          icon: Layers,
+          iconStyle: "bg-[#ECFDF5] text-[#10B981] border-[#A7F3D0]"
+        },
+        {
+          title: "Rooms",
+          description: "Manage rooms and their allocations",
+          href: "/rooms",
+          icon: Bed,
+          iconStyle: "bg-[#EFF6FF] text-[#3B82F6] border-[#BFDBFE]"
+        },
+        {
+          title: "Students",
+          description: "Manage student records and profiles",
+          href: "/students",
+          icon: Users,
+          iconStyle: "bg-[#FFF7ED] text-[#F97316] border-[#FFEDD5]"
+        },
+        {
+          title: "Contracts",
+          description: "Create and manage lease agreements",
+          href: "/contracts",
+          icon: FileText,
+          iconStyle: "bg-[#FFF1F2] text-[#F43F5E] border-[#FECDD3]"
+        }
+      ]
+    },
+    {
+      title: "Finance",
+      accentColor: "text-[#22C55E]",
+      barColor: "bg-[#22C55E]",
+      items: [
+        {
+          title: "Payments",
+          description: "Track payments and deposit records",
+          href: "/payments",
+          icon: CreditCard,
+          iconStyle: "bg-[#F4F1FF] text-[#6D4AFF] border-[#E5DEFF]"
+        },
+        {
+          title: "Rent Payments",
+          description: "Manage recurring rent payments",
+          href: "/rent-payments",
+          icon: Banknote,
+          iconStyle: "bg-[#ECFDF5] text-[#10B981] border-[#A7F3D0]"
+        }
+      ]
+    },
+    {
+      title: "Audit & History",
+      accentColor: "text-[#F97316]",
+      barColor: "bg-[#F97316]",
+      items: [
+        {
+          title: "Contract Events",
+          description: "Track contract state changes and events",
+          href: "/contract-events",
+          icon: Calendar,
+          iconStyle: "bg-[#FFF7ED] text-[#F97316] border-[#FFEDD5]"
+        },
+        {
+          title: "Contract History",
+          description: "View historical contract records",
+          href: "/contract-history",
+          icon: History,
+          iconStyle: "bg-[#FFF7ED] text-[#F97316] border-[#FFEDD5]"
+        }
+      ]
+    }
   ];
 
   return (
-    <div className="container-page flex flex-col gap-6 pb-6 animate-in slide-in-from-bottom-4 duration-500 font-inter">
-      {/* Page Header */}
-      <PageHeader
-        title="Dashboard Overview"
-        description="Monitor system metrics, resident operations, and quick administrative pathways."
-      />
+    <div className="w-full max-w-full flex flex-col gap-10 font-sans text-[#0F172A]">
+      {/* Header Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        <div className="lg:col-span-7 flex flex-col gap-3">
+          <h1 className="text-[44px] font-bold text-[#0F172A] tracking-[-0.03em] leading-[1.1] font-sans">
+            Dashboard Overview
+          </h1>
+          <p className="text-[24px] font-semibold text-[#0F172A] font-sans">
+            Welcome back, <span className="font-bold">{user?.name || "Admin"}</span>! 👋
+          </p>
+          <p className="text-[16px] font-medium text-[#64748B] max-w-2xl font-sans">
+            Manage hostels, students, rooms, contracts and payments from a single platform.
+          </p>
+          
+          {/* Quick Actions */}
+          <div className="flex flex-wrap gap-3 mt-4">
+            <button
+              onClick={() => router.push("/hostels")}
+              className="h-11 px-5 rounded-xl text-[14px] font-semibold text-white bg-gradient-to-r from-[#6D4AFF] to-[#5938E3] hover:from-[#5B3CE3] hover:to-[#4C2ECC] transition-all flex items-center gap-2 shadow-[0_4px_12px_rgba(109,76,255,0.15)] cursor-pointer font-sans"
+            >
+              <Plus size={18} />
+              <span>Add Hostel</span>
+            </button>
+            <button
+              onClick={() => router.push("/students/new")}
+              className="h-11 px-5 rounded-xl text-[14px] font-semibold text-[#0F172A] bg-white hover:bg-[#F8FAFC] border border-[#E2E8F0] transition-all flex items-center gap-2 cursor-pointer font-sans"
+            >
+              <Plus size={18} />
+              <span>Add Student</span>
+            </button>
+            <button
+              onClick={() => router.push("/contracts/new")}
+              className="h-11 px-5 rounded-xl text-[14px] font-semibold text-[#0F172A] bg-white hover:bg-[#F8FAFC] border border-[#E2E8F0] transition-all flex items-center gap-2 cursor-pointer font-sans"
+            >
+              <FileText size={18} />
+              <span>Create Contract</span>
+            </button>
+          </div>
+        </div>
 
-      {/* Premium Hero Banner */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-[#6D4AFF] via-[#5938E3] to-[#4C1D95] rounded-2xl p-6 xl:p-8 text-white shadow-lg border border-purple-500/10 mb-2">
-        <div className="absolute top-[-50%] right-[-10%] w-[400px] h-[400px] rounded-full bg-white/5 blur-3xl pointer-events-none" />
-        <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-          <div className="flex flex-col gap-2">
-            <span className="text-purple-200/90 text-sm font-semibold tracking-wider uppercase">Welcome Back</span>
-            <h2 className="text-2xl xl:text-3xl font-extrabold tracking-tight">
-              {user?.name || "System Administrator"}
-            </h2>
-            <p className="text-purple-100/80 text-sm xl:text-base font-light max-w-lg mt-1">
-              You are signed in as <span className="font-semibold text-white">Admin</span>. Everything is operational. Manage resident profiles, room vacancies, and contracts seamlessly.
-            </p>
-          </div>
-          <div className="px-5 py-3 rounded-xl bg-white/10 border border-white/10 backdrop-blur-md flex items-center gap-3">
-            <TrendingUp className="w-5 h-5 text-emerald-300 shrink-0" />
-            <div className="flex flex-col">
-              <span className="text-[11px] text-purple-200 font-bold uppercase tracking-wider">Occupancy Rate</span>
-              <span className="text-base font-bold text-white">92.4% Average</span>
-            </div>
-          </div>
+        {/* Decorative Illustration */}
+        <div className="lg:col-span-5 flex justify-center lg:justify-end">
+          <svg
+            viewBox="0 0 400 200"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-full h-auto max-w-[400px] select-none pointer-events-none"
+          >
+            {/* Sun/Moon */}
+            <circle cx="340" cy="50" r="24" fill="#EEF2F6" />
+            
+            {/* Background clouds / shapes */}
+            <circle cx="320" cy="110" r="45" fill="#EEF2F6" opacity="0.4" />
+            <circle cx="90" cy="120" r="25" fill="#EEF2F6" opacity="0.4" />
+
+            {/* Distant trees/shrubs (circles) */}
+            <circle cx="65" cy="155" r="16" fill="#D8B4FE" opacity="0.7" />
+            <circle cx="365" cy="165" r="14" fill="#D8B4FE" opacity="0.7" />
+            <circle cx="380" cy="170" r="12" fill="#C7D2FE" opacity="0.8" />
+            
+            {/* Back building (tall, center) */}
+            <rect x="220" y="50" width="80" height="130" rx="4" fill="#EEF2F6" stroke="#C7D2FE" strokeWidth="1.5" />
+            {/* Back building roof */}
+            <path d="M220 50L260 35L300 50Z" fill="#E2E8F0" stroke="#C7D2FE" strokeWidth="1.5" />
+            {/* Back building windows */}
+            <rect x="235" y="65" width="12" height="18" rx="2" fill="#FFFFFF" stroke="#C7D2FE" strokeWidth="1" />
+            <rect x="254" y="65" width="12" height="18" rx="2" fill="#FFFFFF" stroke="#C7D2FE" strokeWidth="1" />
+            <rect x="273" y="65" width="12" height="18" rx="2" fill="#FFFFFF" stroke="#C7D2FE" strokeWidth="1" />
+            
+            <rect x="235" y="95" width="12" height="18" rx="2" fill="#FFFFFF" stroke="#C7D2FE" strokeWidth="1" />
+            <rect x="254" y="95" width="12" height="18" rx="2" fill="#FFFFFF" stroke="#C7D2FE" strokeWidth="1" />
+            <rect x="273" y="95" width="12" height="18" rx="2" fill="#FFFFFF" stroke="#C7D2FE" strokeWidth="1" />
+
+            <rect x="235" y="125" width="12" height="18" rx="2" fill="#FFFFFF" stroke="#C7D2FE" strokeWidth="1" />
+            <rect x="254" y="125" width="12" height="18" rx="2" fill="#FFFFFF" stroke="#C7D2FE" strokeWidth="1" />
+            <rect x="273" y="125" width="12" height="18" rx="2" fill="#FFFFFF" stroke="#C7D2FE" strokeWidth="1" />
+
+            {/* Left Building (lavender) */}
+            <rect x="150" y="80" width="60" height="100" rx="4" fill="#F3E8FF" stroke="#D8B4FE" strokeWidth="1.5" />
+            {/* Left building windows */}
+            <rect x="162" y="95" width="10" height="14" rx="2" fill="#FFFFFF" stroke="#D8B4FE" strokeWidth="1" />
+            <rect x="178" y="95" width="10" height="14" rx="2" fill="#FFFFFF" stroke="#D8B4FE" strokeWidth="1" />
+            
+            <rect x="162" y="120" width="10" height="14" rx="2" fill="#FFFFFF" stroke="#D8B4FE" strokeWidth="1" />
+            <rect x="178" y="120" width="10" height="14" rx="2" fill="#FFFFFF" stroke="#D8B4FE" strokeWidth="1" />
+            
+            <rect x="162" y="145" width="10" height="14" rx="2" fill="#FFFFFF" stroke="#D8B4FE" strokeWidth="1" />
+            <rect x="178" y="145" width="10" height="14" rx="2" fill="#FFFFFF" stroke="#D8B4FE" strokeWidth="1" />
+
+            {/* Right Building (light blue) */}
+            <rect x="308" y="90" width="50" height="90" rx="4" fill="#EFF6FF" stroke="#C7D2FE" strokeWidth="1.5" />
+            {/* Right building windows */}
+            <rect x="318" y="105" width="10" height="12" rx="1.5" fill="#FFFFFF" stroke="#C7D2FE" strokeWidth="1" />
+            <rect x="332" y="105" width="10" height="12" rx="1.5" fill="#FFFFFF" stroke="#C7D2FE" strokeWidth="1" />
+            
+            <rect x="318" y="125" width="10" height="12" rx="1.5" fill="#FFFFFF" stroke="#C7D2FE" strokeWidth="1" />
+            <rect x="332" y="125" width="10" height="12" rx="1.5" fill="#FFFFFF" stroke="#C7D2FE" strokeWidth="1" />
+            
+            <rect x="318" y="145" width="10" height="12" rx="1.5" fill="#FFFFFF" stroke="#C7D2FE" strokeWidth="1" />
+            <rect x="332" y="145" width="10" height="12" rx="1.5" fill="#FFFFFF" stroke="#C7D2FE" strokeWidth="1" />
+
+            {/* Tree trunks */}
+            <rect x="63" y="170" width="4" height="15" fill="#D8B4FE" />
+            <rect x="363" y="175" width="4" height="10" fill="#D8B4FE" />
+
+            {/* Ground Line */}
+            <line x1="50" y1="180" x2="380" y2="180" stroke="#C7D2FE" strokeWidth="2" strokeLinecap="round" />
+          </svg>
         </div>
       </div>
 
-      {/* Metrics Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Summary Cards Row */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
         {statCards.map((card) => {
           const Icon = card.icon;
           return (
             <div
               key={card.title}
               onClick={() => router.push(card.href)}
-              className="bg-white rounded-2xl border border-slate-200/80 p-5 flex items-center gap-4 cursor-pointer hover:shadow-md hover:-translate-y-0.5 hover:border-slate-300 transition-all duration-300 group"
+              className="relative bg-white rounded-2xl border border-[#E2E8F0] py-[16px] px-5 flex items-center gap-4 h-[110px] shadow-[0_1px_2px_rgba(15,23,42,0.02)] cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 group overflow-hidden"
             >
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border transition-transform duration-300 group-hover:scale-105 ${card.color}`}>
-                <Icon className="w-6 h-6" />
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border transition-transform duration-300 group-hover:scale-105 ${card.iconStyle}`}>
+                <Icon size={22} />
               </div>
               <div className="flex flex-col min-w-0">
-                <span className="text-slate-400 text-xs font-semibold uppercase tracking-wider leading-none mb-1.5">
+                <span className="text-[#64748B] text-[14px] font-semibold leading-none mb-1.5 font-sans">
                   {card.title}
                 </span>
-                <span className="text-2xl font-bold text-slate-800 tracking-tight leading-tight">
+                <span className="text-[36px] font-bold text-[#0F172A] tracking-[-0.02em] leading-none mb-1.5 font-sans">
                   {isLoading ? "..." : card.value}
                 </span>
-                <span className="text-slate-400 text-xs font-medium truncate mt-1">
+                <span className="text-[#94A3B8] text-[13px] font-medium leading-none truncate font-sans">
                   {card.description}
                 </span>
               </div>
+              <div className={`absolute bottom-0 left-0 right-0 h-[4px] ${card.accentBg}`} />
             </div>
           );
         })}
       </div>
 
-      {/* Modules Panel */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-[0_1px_2px_rgba(15,23,42,0.02)]">
-        <div className="flex items-center gap-3 border-b border-slate-100 pb-4 mb-6">
-          <div className="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-[#6D4AFF]">
-            <LayoutDashboard className="w-4 h-4" />
-          </div>
-          <div className="flex flex-col">
-            <h3 className="text-base font-bold text-slate-800">Operational Sub-Modules</h3>
-            <p className="text-xs text-slate-400 font-medium">Quick links to view and manage hostel resources</p>
-          </div>
-        </div>
+      {/* Operations, Finance, Audit & History Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+        {sections.map((section) => (
+          <div
+            key={section.title}
+            className="bg-white rounded-[18px] border border-[#E2E8F0] p-6 flex flex-col gap-6 shadow-[0_1px_2px_rgba(15,23,42,0.02)] h-full"
+          >
+            {/* Section Header */}
+            <div className="flex flex-col gap-2 pb-2">
+              <h3 className={`text-[24px] font-bold ${section.accentColor} font-sans`}>
+                {section.title}
+              </h3>
+              <div className={`w-10 h-[3.5px] ${section.barColor} rounded-full`} />
+            </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-          {quickLinks.map((link) => {
-            const Icon = link.icon;
-            return (
-              <div
-                key={link.name}
-                onClick={() => router.push(link.href)}
-                className="group p-4 bg-slate-50/50 hover:bg-[#F4F0FF]/50 border border-slate-100 hover:border-[#6D4AFF]/20 rounded-xl cursor-pointer flex flex-col gap-3 justify-between transition-all duration-300"
-              >
-                <div className="flex justify-between items-start">
-                  <div className="w-9 h-9 rounded-lg bg-white border border-slate-200/60 text-slate-500 group-hover:text-[#6D4AFF] group-hover:border-[#6D4AFF]/20 flex items-center justify-center transition-colors">
-                    <Icon className="w-5 h-5" />
+            {/* Section Items */}
+            <div className="flex flex-col gap-1.5">
+              {section.items.map((item) => {
+                const ItemIcon = item.icon;
+                return (
+                  <div
+                    key={item.title}
+                    onClick={() => router.push(item.href)}
+                    className="flex items-center justify-between p-3.5 hover:bg-[#F8FAFC] rounded-xl transition-all duration-200 cursor-pointer group"
+                  >
+                    <div className="flex items-center min-w-0">
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 border ${item.iconStyle} mr-4`}>
+                        <ItemIcon size={20} />
+                      </div>
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-[16px] font-semibold text-[#0F172A] leading-snug group-hover:text-[#6D4AFF] transition-colors font-sans">
+                          {item.title}
+                        </span>
+                        <span className="text-[14px] text-[#64748B] font-medium leading-normal truncate font-sans">
+                          {item.description}
+                        </span>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-[#6D4AFF] group-hover:translate-x-0.5 transition-all shrink-0" />
                   </div>
-                  <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-[#6D4AFF] group-hover:translate-x-0.5 transition-all duration-300 opacity-0 group-hover:opacity-100" />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-[14px] font-bold text-slate-700 group-hover:text-[#6D4AFF] transition-colors leading-tight mb-1">
-                    {link.name}
-                  </span>
-                  <span className="text-[12px] text-slate-400 group-hover:text-slate-500 font-medium leading-normal line-clamp-2">
-                    {link.description}
-                  </span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

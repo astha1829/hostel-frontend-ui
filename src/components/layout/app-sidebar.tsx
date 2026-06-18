@@ -15,22 +15,24 @@ import {
   Banknote, 
   Calendar, 
   History,
-  ChevronDown
+  ChevronDown,
+  LayoutDashboard
 } from "lucide-react";
 import { useSidebar } from "./client-layout";
 import { useAuth } from "@/features/auth";
 
 const navItems = [
+  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Hostels", href: "/hostels", icon: Building2 },
-  { name: "Hostel Floors", href: "/hostel-floors", icon: Layers },
+  { name: "Hostel Floors", href: "/floors", icon: Layers },
   { name: "Rooms", href: "/rooms", icon: Home },
   { name: "Students", href: "/students", icon: Users },
-  { name: "Contracts", href: "/hostel-contracts", icon: FileText },
-  { name: "Allotments", href: "/room-allotments", icon: ClipboardList },
-  { name: "Payments", href: "/room-allotment-payments", icon: CreditCard },
+  { name: "Contracts", href: "/contracts", icon: FileText },
+  { name: "Allotments", href: "/allotments", icon: ClipboardList },
+  { name: "Payments", href: "/payments", icon: CreditCard },
   { name: "Rent Payments", href: "/rent-payments", icon: Banknote },
-  { name: "Contract Events", href: "/hostel-contract-events", icon: Calendar },
-  { name: "Contract History", href: "/hostel-contract-history", icon: History },
+  { name: "Contract Events", href: "/contract-events", icon: Calendar },
+  { name: "Contract History", href: "/contract-history", icon: History },
 ];
 
 export function AppSidebar() {
@@ -65,7 +67,7 @@ export function AppSidebar() {
       <div className="flex-1 overflow-y-auto px-[14px] pb-[20px] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         <div className="flex flex-col gap-[8px]">
           {navItems.map((item) => {
-            const isActive = pathname.startsWith(item.href) || (pathname === '/' && item.href === '/hostels');
+            const isActive = pathname.startsWith(item.href) || (pathname === '/' && item.href === '/dashboard');
             const Icon = item.icon;
             
             return (

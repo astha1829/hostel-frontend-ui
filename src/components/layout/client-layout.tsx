@@ -102,7 +102,7 @@ function ClientLayoutContent({ children }: { children: React.ReactNode }) {
       <AppSidebar />
       <div 
         className={`flex-1 flex flex-col min-w-0 transition-[padding] duration-300 ease-in-out ${
-          isMounted && isCollapsed ? "pl-[80px]" : "pl-[260px]"
+          isMounted && isCollapsed ? "pl-0" : "pl-[260px]"
         }`}
       >
         <AppHeader />
@@ -110,8 +110,12 @@ function ClientLayoutContent({ children }: { children: React.ReactNode }) {
           <div className="flex-1">
             {children}
           </div>
-          <footer className="mt-12 pb-4 text-center text-sm font-medium text-slate-400">
-            © 2026 Georgia Campus Hostel Management System. All rights reserved.
+          <footer className="mt-12 pb-4 flex justify-between items-center border-t border-[#E2E8F0] pt-6 text-sm font-medium text-slate-400 font-['Poppins',sans-serif]">
+            <span>© 2026 ATMIA Hostel Management System</span>
+            <div className="flex items-center gap-2">
+              <span>System Status: <span className="text-slate-600 font-semibold">Operational</span></span>
+              <span className="w-2 h-2 rounded-full bg-[#22C55E] animate-pulse"></span>
+            </div>
           </footer>
         </main>
       </div>

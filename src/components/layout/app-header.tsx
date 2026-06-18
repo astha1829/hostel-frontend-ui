@@ -30,6 +30,15 @@ export function AppHeader() {
     await logout();
   };
 
+  const getInitials = (name: string) => {
+    const parts = name.split(" ");
+    if (parts.length >= 2) {
+      return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+    }
+    return name.slice(0, 2).toUpperCase();
+  };
+  const initials = getInitials(user?.name || "System Administrator");
+
   return (
     <header className="h-[84px] bg-[#FFFFFF] flex items-center justify-between px-8 sticky top-0 z-40 w-full border-b border-[#EAECEF] shadow-[0_1px_2px_rgba(15,23,42,0.04)] font-['Inter',sans-serif]">
       <div className="flex items-center">
@@ -44,18 +53,20 @@ export function AppHeader() {
       <div className="flex items-center gap-6">
         {/* Search Input */}
         <div className="relative hidden md:block w-[300px]">
-          <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
           <input 
             type="text" 
             placeholder="Search anything..." 
-            className="w-full h-10 pl-10 pr-4 bg-white border border-slate-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-purple-100 focus:border-[#6D4AFF] transition-all"
+            className="w-full h-10 pl-5 pr-10 bg-white border border-slate-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-purple-100 focus:border-[#6D4AFF] transition-all placeholder-slate-400 font-medium text-slate-700"
           />
+          <Search className="w-4 h-4 absolute right-4 top-1/2 -translate-y-1/2 text-slate-400" />
         </div>
 
         {/* Notifications */}
         <button className="relative p-2.5 bg-white text-slate-400 hover:text-slate-600 rounded-full shadow-sm border border-slate-200 transition-colors cursor-pointer hover:bg-slate-50">
           <Bell className="w-5 h-5" />
-          <span className="absolute top-2 right-2 w-2 h-2 bg-[#E91E63] rounded-full animate-pulse"></span>
+          <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#6D4AFF] text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white">
+            4
+          </span>
         </button>
         
         {/* User Profile Area */}
@@ -64,12 +75,8 @@ export function AppHeader() {
             onClick={() => setDropdownOpen(prev => !prev)}
             className="flex items-center gap-3 cursor-pointer group p-1.5 rounded-xl hover:bg-slate-50/80 transition-all duration-200"
           >
-            <div className="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center overflow-hidden bg-slate-100">
-              <img 
-                src={`https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user?.name || "Admin")}&backgroundColor=6D4AFF`} 
-                alt="Avatar" 
-                className="w-full h-full object-cover"
-              />
+            <div className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden bg-[#6D4AFF] text-white font-bold text-sm select-none">
+              {initials}
             </div>
             <div className="flex flex-col text-left">
               <span className="text-sm font-semibold text-slate-900 leading-tight group-hover:text-[#6D4AFF] transition-colors">
