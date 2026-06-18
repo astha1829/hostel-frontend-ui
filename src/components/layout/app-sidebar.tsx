@@ -18,6 +18,7 @@ import {
   ChevronDown
 } from "lucide-react";
 import { useSidebar } from "./client-layout";
+import { useAuth } from "@/features/auth";
 
 const navItems = [
   { name: "Hostels", href: "/hostels", icon: Building2 },
@@ -35,6 +36,7 @@ const navItems = [
 export function AppSidebar() {
   const pathname = usePathname();
   const { isCollapsed } = useSidebar();
+  const { user } = useAuth();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -102,20 +104,21 @@ export function AppSidebar() {
       <div className={`border-t border-[#E9EDF5] bg-[#FFFFFF] shrink-0 transition-all duration-300 ${collapsed ? "p-[20px_0] flex justify-center" : "p-[20px_24px]"}`}>
         <div className={`flex items-center cursor-pointer group ${collapsed ? "justify-center" : "justify-between"}`}>
           <div className="flex items-center gap-[16px]">
-            <div className="w-[48px] h-[48px] rounded-full overflow-hidden shrink-0">
-              <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-                <rect width="48" height="48" fill="#F1F5F9"/>
-                <path d="M24 22C27.3137 22 30 19.3137 30 16C30 12.6863 27.3137 10 24 10C20.6863 10 18 12.6863 18 16C18 19.3137 20.6863 22 24 22Z" fill="#FCD5CE"/>
-                <path d="M24 10C20.6863 10 18 12.6863 18 16H30C30 12.6863 27.3137 10 24 10Z" fill="#1E293B"/>
-                <path d="M10 38C10 32.4772 16.268 28 24 28C31.732 28 38 32.4772 38 38V48H10V38Z" fill="#1D4ED8"/>
-                <path d="M24 28L18 48H30L24 28Z" fill="#FFFFFF"/>
-                <path d="M24 28L22 35H26L24 28Z" fill="#93C5FD"/>
-              </svg>
+            <div className="w-[48px] h-[48px] rounded-full overflow-hidden shrink-0 border border-slate-100">
+              <img 
+                src={`https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user?.name || "Admin")}&backgroundColor=6D4AFF`} 
+                alt="Avatar" 
+                className="w-full h-full object-cover"
+              />
             </div>
             
             <div className={`flex flex-col whitespace-nowrap overflow-hidden transition-all duration-300 ${collapsed ? "w-0 opacity-0" : "w-[120px] opacity-100"}`}>
-              <span className="text-[15px] font-[600] text-[#0F172A] leading-tight mb-[4px]">Admin User</span>
-              <span className="text-[14px] text-[#64748B] font-[400] leading-tight">Super Admin</span>
+              <span className="text-[15px] font-[600] text-[#0F172A] leading-tight mb-[4px] truncate">
+                {user?.name || "System Administrator"}
+              </span>
+              <span className="text-[14px] text-[#64748B] font-[400] leading-tight truncate">
+                {user?.roles?.[0] || "Admin"}
+              </span>
             </div>
           </div>
           

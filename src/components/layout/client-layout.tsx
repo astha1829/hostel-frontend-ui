@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, createContext, useContext } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { AuthProvider, useAuth } from "@/features/auth";
 import { AppSidebar } from "./app-sidebar";
 import { AppHeader } from "./app-header";
 
@@ -16,9 +18,30 @@ const SidebarContext = createContext<SidebarContextType>({
 
 export const useSidebar = () => useContext(SidebarContext);
 
-export function ClientLayout({ children }: { children: React.ReactNode }) {
+function FullscreenLoader() {
+  return (
+    <div className="fixed inset-0 bg-[#FAFBFC] flex flex-col items-center justify-center z-[9999] font-['Inter',sans-serif]">
+      <div className="flex flex-col items-center gap-5">
+        <div className="relative w-16 h-16">
+          <div className="absolute inset-0 rounded-full border-4 border-purple-100 animate-pulse" />
+          <div className="absolute inset-0 rounded-full border-4 border-t-[#6D4AFF] border-r-transparent border-b-transparent border-l-transparent animate-spin" />
+        </div>
+        <div className="flex flex-col items-center gap-1.5 text-center">
+          <span className="text-slate-800 font-bold tracking-tight text-lg">Georgia Campus</span>
+          <span className="text-slate-400 text-sm font-medium animate-pulse">Restoring your secure session...</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ClientLayoutContent({ children }: { children: React.ReactNode }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  
+  const pathname = usePathname();
+  const router = useRouter();
+  const { isAuthenticated, isLoading } = useAuth();
 
   useEffect(() => {
     setIsMounted(true);
@@ -36,6 +59,44 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
     });
   };
 
+  // Enforce Route Guarding
+  useEffect(() => {
+    if (!isMounted || isLoading) return;
+
+    if (pathname === "/login") {
+      if (isAuthenticated) {
+        router.replace("/dashboard");
+      }
+    } else {
+      if (!isAuthenticated) {
+        router.replace("/login");
+      }
+    }
+  }, [isMounted, isLoading, isAuthenticated, pathname, router]);
+
+  // Loading state when restoring session or mounting component
+  if (!isMounted || isLoading) {
+    return <FullscreenLoader />;
+  }
+
+  const isLoginPage = pathname === "/login";
+
+  // If unauthenticated and on a protected route, show loader while redirecting
+  if (!isAuthenticated && !isLoginPage) {
+    return <FullscreenLoader />;
+  }
+
+  // If authenticated and on login page, show loader while redirecting
+  if (isAuthenticated && isLoginPage) {
+    return <FullscreenLoader />;
+  }
+
+  // Raw layout for login page
+  if (isLoginPage) {
+    return <div className="w-full min-h-screen bg-slate-50">{children}</div>;
+  }
+
+  // Standard protected layout
   return (
     <SidebarContext.Provider value={{ isCollapsed, toggleSidebar }}>
       <AppSidebar />
@@ -55,5 +116,13 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
         </main>
       </div>
     </SidebarContext.Provider>
+  );
+}
+
+export function ClientLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <AuthProvider>
+      <ClientLayoutContent>{children}</ClientLayoutContent>
+    </AuthProvider>
   );
 }

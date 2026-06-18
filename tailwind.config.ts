@@ -50,6 +50,7 @@ const config: Config = {
       },
       fontFamily: {
         sans: ["var(--font-sans)"],
+        poppins: ["var(--font-poppins)"],
       },
     },
   },

@@ -38,10 +38,15 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
     "Content-Type": "application/json",
   };
 
+  // Get token from localStorage if running in browser
+  const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
+  const authHeaders: HeadersInit = token ? { "Authorization": `Bearer ${token}` } : {};
+
   const config: RequestInit = {
     method: options.method || "GET",
     headers: {
       ...defaultHeaders,
+      ...authHeaders,
       ...headers,
     },
     ...customConfig,

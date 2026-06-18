@@ -1,4 +1,5 @@
 import { Hostel } from "../hostels/types";
+import { HostelRoom } from "../rooms/types";
 
 export interface Student {
   id: string; // Database UUID
@@ -43,6 +44,7 @@ export interface Student {
   
   // Relations
   hostel?: Hostel;
+  room?: HostelRoom;
 }
 
 export interface CreateStudentPayload {
